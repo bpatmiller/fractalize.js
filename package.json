@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "gammacv": "^0.5.2"
+  },
+  "name": "fractalize",
+  "version": "1.0.0",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "snowpack": "^3.7.1"
+  }
+}

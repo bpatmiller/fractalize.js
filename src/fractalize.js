@@ -42,7 +42,6 @@ export const getComplexPoints = (groupEdges) => {
 
 const PI_Z = (lejaPoints, group, s) => {
   if (lejaPoints.length == 0) {
-    // console.log(group);
     return group[s].abs();
   }
   var k = 1.0;
@@ -69,9 +68,12 @@ export const getLejaPoints = (edgePoints) => {
   let lejaStack = {};
   for (var key in edgePoints) {
     const group = edgePoints[key];
-    // center group about 0,0
+    // temporarily "center" the group,
+    // then shift it back after leja points are found
     let center = findCenter(group);
-    console.log(center);
+    for (let i = 0; i < group.length; i++) {
+      group[i] = group[i].sub(center);
+    }
 
     const n = Math.min(PARAMS.numLejaPoints, Math.floor(group.length / 2));
     let lejaPoints = [];
@@ -88,6 +90,10 @@ export const getLejaPoints = (edgePoints) => {
       }
       lejaPoints.push(group[smax]);
       group.splice(smax, 1);
+    }
+    // now "shift back" the points
+    for (let i = 0; i < lejaPoints.length; i++) {
+      lejaPoints[i] = lejaPoints[i].add(center);
     }
     lejaStack[key] = lejaPoints;
   }

@@ -6,10 +6,23 @@
         margin: 0;
         overflow: hidden;
       }
+      .head {
+        text-align: center;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        background: linear-gradient(90deg, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);      
+
+      }
       div#drop {
-        width: 200px;
-        height: 200px;
-        border: 4px dashed blue; 
+        width: 100%;
+        height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgb(238,174,202);
+        background: radial-gradient(circle, rgba(238,174,202,1) 0%, rgba(148,187,233,1) 100%);      }
+      div#drop:hover {
+        opacity: 50%;
       }
       .dragging {
         opacity: 50%;
@@ -17,12 +30,26 @@
       canvas {
         border: 4px dashed green;
       }
+      .flex-container {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .flex-box {
+        display: flex;
+      }
     </style>
   </head>
   <body>
-    <div id="drop">drag image here
-  </div>
-    <canvas id="resized"></canvas>
+    <div class="head">fractalize.js</div>
+    <div id="drop" class="flex-box">
+      <div class="center-text">
+        drag image here
+      </div>
+    </div>
+    <div class="flex-container">
+      <canvas id="resized" class="flex-box"></canvas>
+      <canvas id="fractal"class="flex-box"></canvas>
+    </div>
     <script type="module" src="src/index.js"></script>
   </body>
 </html>

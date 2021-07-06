@@ -1,39 +1,8 @@
-import * as gm from "gammacv";
-import { getExtensionMatch } from "snowpack/lib/util";
+import { getComplexPoints, getLejaPoints } from "./fractalize.js";
+import { handleImage } from "./image.js";
+import { makePane } from "./config.js";
 
-const canvas = document.getElementById("resized");
-const ctx = canvas.getContext("2d");
-
-// const getHeightAndWidthFromDataUrl = (dataURL) =>
-//   new Promise((resolve) => {
-//     const img = new Image();
-//     img.onload = () => {
-//       resolve({
-//         height: img.height,
-//         width: img.width,
-//       });
-//     };
-//     img.src = dataURL;
-//   });
-
-const drawCanvasFromURL = (dataURL) =>
-  new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      let mainAxis = Math.max(img.width, img.height);
-      let w = Math.floor(img.width * (400 / mainAxis));
-      let h = Math.floor(img.height * (400 / mainAxis));
-      canvas.width = w;
-      canvas.height = h;
-      ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, w, h);
-      resolve({
-        width: w,
-        height: h,
-      });
-    };
-    img.src = dataURL;
-  });
-
+const pane = makePane();
 var dropZone = document.getElementById("drop");
 
 dropZone.addEventListener("dragover", function (e) {
@@ -61,19 +30,3 @@ dropZone.addEventListener("drop", function (e) {
     }
   }
 });
-
-const handleImage = async (file) => {
-  const srcImgUrl = URL.createObjectURL(file);
-  const dim = await drawCanvasFromURL(srcImgUrl);
-  console.log(dim);
-
-  let imgT = new gm.Tensor("uint8", [dim.width, dim.height, 4]);
-  gm.canvasToTensor(canvas, imgT);
-
-  //   const op = gm.colorSegmentation(imgT, 4);
-  //   const out = gm.tensorFrom(op);
-  //   const sess = new gm.Session();
-  //   sess.init(op);
-  //   sess.runOp(op, 0, out);
-  //   gm.canvasFromTensor(canvas, out);
-};

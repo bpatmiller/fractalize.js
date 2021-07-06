@@ -1,6 +1,8 @@
 {
   "dependencies": {
-    "gammacv": "^0.5.2"
+    "complex.js": "^2.0.15",
+    "gammacv": "^0.5.2",
+    "tweakpane": "^3.0.2"
   },
   "name": "fractalize",
   "version": "1.0.0",

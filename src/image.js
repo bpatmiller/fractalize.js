@@ -155,4 +155,7 @@ export const handleImage = async (file) => {
   }
 
   const complexPoints = getComplexPoints(groupEdges);
+  console.log(complexPoints);
+  const lejaStack = getLejaPoints(complexPoints);
+  console.log(lejaStack);
 };

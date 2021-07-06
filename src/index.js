@@ -3,6 +3,8 @@ import { makePane } from "./config.js";
 import { setupGL } from "./gl.js";
 const pane = makePane();
 
+// normal, unscaled/transformed set of complex edge points
+
 var dropZone = document.getElementById("drop");
 
 dropZone.addEventListener("dragover", function (e) {

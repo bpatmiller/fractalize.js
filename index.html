@@ -37,9 +37,6 @@
       .dragging {
         background: radial-gradient(circle, rgba(109, 77, 91) 0%, rgba(0,0,0,0) 10%);      
       }
-      canvas {
-        padding: 0px;
-      }
       .flex-container {
         display: flex;
         flex-direction: row;
@@ -49,6 +46,8 @@
       }
       .flex-box {
         display: flex;
+        padding: 0;
+        border: 1px red solid;
       }
     </style>
   </head>
@@ -66,7 +65,7 @@
     </div>
     <div class="flex-container">
       <canvas id="resized" class="flex-box"></canvas>
-      <canvas id="fractal"class="flex-box"></canvas>
+      <div id="fractal"class="flex-box"></div>
     </div>
     <script type="module" src="src/index.js"></script>
   </body>

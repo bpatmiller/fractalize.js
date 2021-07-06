@@ -1,6 +1,6 @@
 import { handleImage } from "./image.js";
 import { makePane } from "./config.js";
-
+import { setupGL } from "./gl.js";
 const pane = makePane();
 
 var dropZone = document.getElementById("drop");
@@ -15,7 +15,7 @@ dropZone.addEventListener("dragleave", function (e) {
   e.preventDefault();
 });
 
-dropZone.addEventListener("drop", function (e) {
+dropZone.addEventListener("drop", async function (e) {
   this.classList.remove("dragging");
   e.preventDefault();
   if (e.dataTransfer.items) {
@@ -25,7 +25,8 @@ dropZone.addEventListener("drop", function (e) {
         e.dataTransfer.items[i].type.match("^image/")
       ) {
         var file = e.dataTransfer.items[i].getAsFile();
-        const groupEdges = handleImage(file);
+        const [lejaStack, A_nStack] = await handleImage(file);
+        setupGL(lejaStack, A_nStack);
       }
     }
   }

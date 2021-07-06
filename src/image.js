@@ -1,5 +1,5 @@
 import * as gm from "gammacv";
-import { getComplexPoints, getLejaPoints } from "./fractalize.js";
+import { getA_nStack, getComplexPoints, getLejaPoints } from "./fractalize.js";
 import { PARAMS } from "./config";
 
 // basically just
@@ -36,6 +36,10 @@ export const handleImage = async (file) => {
 
   const srcImgUrl = URL.createObjectURL(file);
   const dim = await drawCanvasFromURL(srcImgUrl);
+
+  const rendererContainer = document.getElementById("fractal");
+  rendererContainer.style.width = dim.width;
+  rendererContainer.style.height = dim.height;
 
   // resized image tensor
   let imgT = new gm.Tensor("uint8", [dim.width, dim.height, 4]);
@@ -155,7 +159,9 @@ export const handleImage = async (file) => {
   }
 
   const complexPoints = getComplexPoints(groupEdges);
-  console.log(complexPoints);
+
   const lejaStack = getLejaPoints(complexPoints);
-  console.log(lejaStack);
+  const A_nStack = getA_nStack(lejaStack);
+  // at this point we are done with the precomputation and ready to render
+  return [lejaStack, A_nStack];
 };

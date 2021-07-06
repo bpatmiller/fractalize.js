@@ -3,7 +3,7 @@ import { Pane } from "tweakpane";
 export const PARAMS = {
   outputSize: 260,
   minClusterSize: 0.03,
-  numColors: 7,
+  numColors: 6,
   numValidSubsets: "",
   edgePoints: "",
   scale: 1.0,

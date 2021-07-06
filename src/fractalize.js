@@ -51,6 +51,23 @@ const PI_Z = (lejaPoints, group, s) => {
   return k;
 };
 
+const A_n = (lejaPoints) => {
+  let a = 1.0;
+  for (let i = 0; i < lejaPoints.length - 1; i++) {
+    a *= lejaPoints[lejaPoints.length - 1].sub(lejaPoints[i]).abs();
+  }
+  return a;
+};
+
+export const getA_nStack = (lejaStack) => {
+  var A_nStack = {};
+  for (var key in lejaStack) {
+    let lejaPoints = lejaStack[key];
+    A_nStack[key] = A_n(lejaPoints);
+  }
+  return A_nStack;
+};
+
 const findCenter = (complexList) => {
   let x = 0;
   let y = 0;

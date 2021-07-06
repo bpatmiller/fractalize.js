@@ -9,7 +9,7 @@
   "version": "1.0.0",
   "scripts": {
     "start": "snowpack dev",
-    "deploy": "rm -rf ../gh-pages && snowpack build && cp -r build/ ../gh-pages && rm -rf build/"
+    "build": "snowpack build"
   },
   "author": "",
   "license": "ISC",

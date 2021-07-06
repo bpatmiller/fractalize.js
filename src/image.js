@@ -145,6 +145,21 @@ export const handleImage = async (file) => {
 
   ctx.fillStyle = `rgba(255,255,255,0.85)`;
   ctx.fillRect(0, 0, dim.width, dim.height);
+
+  // draw over group colors, then white over, then draw outlines
+  for (let x = 0; x < dim.width; x++) {
+    for (let y = 0; y < dim.height; y++) {
+      if (groups.get(x, y) != 255) {
+        let gn = groups.get(x, y);
+        let r = Math.floor(Math.sin(gn) * 80) + 100;
+        let b = Math.floor(Math.cos(gn + 0.5) * 80) + 100;
+        let g = 240 - b;
+        ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+        ctx.fillRect(y, x, 1, 1);
+      }
+    }
+  }
+
   for (let x = 0; x < dim.width; x++) {
     for (let y = 0; y < dim.height; y++) {
       if (groupEdges.get(x, y) != 255) {

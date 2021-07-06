@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "complex.js": "^2.0.15",
+    "gammacv": "^0.5.2",
+    "three": "^0.130.1",
+    "tweakpane": "^3.0.2"
+  },
+  "name": "fractalize",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@snowpack/plugin-webpack": "^3.0.0",
+    "snowpack": "^3.7.1"
+  }
+}

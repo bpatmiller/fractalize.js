@@ -1,8 +1,8 @@
-import { getComplexPoints, getLejaPoints } from "./fractalize.js";
 import { handleImage } from "./image.js";
 import { makePane } from "./config.js";
 
 const pane = makePane();
+
 var dropZone = document.getElementById("drop");
 
 dropZone.addEventListener("dragover", function (e) {
@@ -25,7 +25,7 @@ dropZone.addEventListener("drop", function (e) {
         e.dataTransfer.items[i].type.match("^image/")
       ) {
         var file = e.dataTransfer.items[i].getAsFile();
-        handleImage(file);
+        const groupEdges = handleImage(file);
       }
     }
   }

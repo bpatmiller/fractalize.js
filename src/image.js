@@ -1,4 +1,5 @@
 import * as gm from "gammacv";
+import { getComplexPoints, getLejaPoints } from "./fractalize.js";
 import { PARAMS } from "./config";
 
 // basically just
@@ -35,7 +36,6 @@ export const handleImage = async (file) => {
 
   const srcImgUrl = URL.createObjectURL(file);
   const dim = await drawCanvasFromURL(srcImgUrl);
-  console.log(dim);
 
   // resized image tensor
   let imgT = new gm.Tensor("uint8", [dim.width, dim.height, 4]);
@@ -115,7 +115,7 @@ export const handleImage = async (file) => {
       }
     }
   }
-
+  PARAMS.numValidSubsets = validGroups;
   var groupEdges = groups.clone();
 
   // remove interior points hehehehe
@@ -139,15 +139,7 @@ export const handleImage = async (file) => {
     }
   }
 
-  console.log(
-    "done with",
-    groupIndex,
-    "groups and",
-    validGroups,
-    "valid groups"
-  );
-
-  ctx.fillStyle = `rgba(255,255,255,0.7)`;
+  ctx.fillStyle = `rgba(255,255,255,0.85)`;
   ctx.fillRect(0, 0, dim.width, dim.height);
   for (let x = 0; x < dim.width; x++) {
     for (let y = 0; y < dim.height; y++) {
@@ -161,4 +153,6 @@ export const handleImage = async (file) => {
       }
     }
   }
+
+  const complexPoints = getComplexPoints(groupEdges);
 };

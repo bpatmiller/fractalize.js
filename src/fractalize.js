@@ -1,10 +1,8 @@
 import { Complex } from "complex.js";
+import * as gm from "gammacv";
 
-export const getComplexPoints = () => {
-  const canvas = document.getElementById("clustered");
-  const ctx = canvas.getContext("2d");
-  var imgData = ctx.getImageData(0, 0, canvas.clientWidth, canvas.clientHeight);
-  console.log(ctx.clientHeight);
+export const getComplexPoints = (groupEdges) => {
+  //   console.log(groupEdges);
 };
 
 export const getLejaPoints = () => {

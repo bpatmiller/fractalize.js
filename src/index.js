@@ -3,8 +3,6 @@ import { makePane } from "./config.js";
 import { setupGL } from "./gl.js";
 const pane = makePane();
 
-// normal, unscaled/transformed set of complex edge points
-
 var dropZone = document.getElementById("drop");
 
 dropZone.addEventListener("dragover", function (e) {
@@ -27,8 +25,10 @@ dropZone.addEventListener("drop", async function (e) {
         e.dataTransfer.items[i].type.match("^image/")
       ) {
         var file = e.dataTransfer.items[i].getAsFile();
-        const [lejaStack, A_nStack] = await handleImage(file);
-        setupGL(lejaStack, A_nStack);
+        const [lejaStack, A_nStack, centers, setSizes] = await handleImage(
+          file
+        );
+        setupGL(lejaStack, A_nStack, centers, setSizes);
       }
     }
   }

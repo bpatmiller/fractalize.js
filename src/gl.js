@@ -1,6 +1,7 @@
 import { Complex } from "../_snowpack/pkg/complexjs.js";
 import * as THREE from "../_snowpack/pkg/three.js";
 import { PARAMS } from "./config.js";
+import { OrbitControls } from "../_snowpack/pkg/three/examples/jsm/controls/OrbitControls.js";
 
 // panels is a jank global object of shaders on panels
 // similarly, targets is a bunch of render textures which will later be composed
@@ -11,6 +12,7 @@ let scenes = {};
 let displayScene;
 let displayPanel;
 let scene;
+let controls;
 
 function vertexShader() {
   return `
@@ -151,7 +153,7 @@ function fragmentShader() {
     }
 
     void main() {
-        vec2 z = (vec2(-vUv.y, vUv.x) + origin.yx) / scale;
+        vec2 z = (vec2(-vUv.y, vUv.x) - origin) / (scale + 0.1 * sin(0.025 * time));
         float len = 0.0;
         int iterations = 0;
         for (;iterations < maxIterations; iterations++) {
@@ -162,11 +164,11 @@ function fragmentShader() {
             len += length(z - tmp);
             z = tmp;
         }
-        float h =  random(an + l1.y);//random(l2.y + l2.x);
+        float h =  0.5 * sin(time * 0.01) + random(an + l1.y);//random(l2.y + l2.x);
         float s = 0.65;
         float v = float(iterations)/float(maxIterations);
         float a = v - 0.3;
-        if (a < 0.6) {
+        if (a < 0.1) {
           discard;
         }
         gl_FragColor = vec4(hsv2rgb(vec3(h,s,v)), a);
@@ -180,8 +182,8 @@ export const updateControlUniforms = () => {
     let material = panels[key].material;
     material.uniforms.maxIterations.value = PARAMS.maxIterations;
     material.uniforms.scale.value = PARAMS.scale;
-    material.uniforms.origin.value.x = PARAMS.origin.x;
-    material.uniforms.origin.value.y = PARAMS.origin.y;
+    // material.uniforms.origin.value.x = PARAMS.origin.x;
+    // material.uniforms.origin.value.y = PARAMS.origin.y;
   }
 };
 
@@ -271,6 +273,9 @@ const setupRenderer = () => {
   rendererContainer.appendChild(renderer.domElement);
 
   camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+
+  controls = new OrbitControls(camera, renderer.domElement);
+
   camera.position.z = 3;
 };
 
@@ -278,7 +283,7 @@ export const clearPanels = () => {
   panels.clear();
 };
 
-export const setupGL = (lejaStack, A_nStack) => {
+export const setupGL = (lejaStack, A_nStack, centers, setSizes) => {
   if (panels.length > 0) {
     updateStackUniforms(lejaStack, A_nStack);
     return;
@@ -288,19 +293,26 @@ export const setupGL = (lejaStack, A_nStack) => {
     setupRenderer();
   }
 
+  let maxSetSize = 0;
+  for (let key in setSizes) {
+    if (setSizes[key] > maxSetSize) {
+      maxSetSize = setSizes[key];
+    }
+  }
+
   // if (displayScene == null) {
   //   setupDisplayScene();
   // }
   scene = new THREE.Scene();
 
-  const [renderWidth, renderHeight] = getRenderDimensions();
-
   for (let key in lejaStack) {
     let lejaPoints = lejaStack[key];
     let A_n = A_nStack[key];
+    let center = centers[key];
+    let setSize = setSizes[key];
 
     const geometry = new THREE.PlaneBufferGeometry(2, 2);
-    // geometry.translate(0, 0, parseInt(key) * 0.1);
+    geometry.translate(0, 0, -0.1 * (setSize / maxSetSize));
     const material = new THREE.ShaderMaterial({
       uniforms: {
         an: { value: A_n },
@@ -308,7 +320,7 @@ export const setupGL = (lejaStack, A_nStack) => {
         time: { value: 0.0 },
         maxIterations: { value: 64 },
         scale: { value: 1.0 },
-        origin: { value: new THREE.Vector2() },
+        origin: { value: new THREE.Vector2(center.re, center.im) },
         l1: { value: new THREE.Vector2() },
         l2: { value: new THREE.Vector2() },
         l3: { value: new THREE.Vector2() },
@@ -369,6 +381,10 @@ export const setupGL = (lejaStack, A_nStack) => {
     // }
     // renderer.setRenderTarget(null);
     // renderer.render(displayScene, camera);
+    for (let key in panels) {
+      panels[key].material.uniforms.time.value += 0.01;
+    }
+    controls.update();
     renderer.render(scene, camera);
   }
   animate();

@@ -3,6 +3,7 @@
     "complex.js": "./complexjs.js",
     "gammacv": "./gammacv.js",
     "three": "./three.js",
+    "three/examples/jsm/controls/OrbitControls": "./three/examples/jsm/controls/OrbitControls.js",
     "tweakpane": "./tweakpane.js"
   }
 }

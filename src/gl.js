@@ -162,13 +162,14 @@ function fragmentShader() {
             len += length(z - tmp);
             z = tmp;
         }
-        float h =  random(an);//random(l2.y + l2.x);
+        float h =  random(an + l1.y);//random(l2.y + l2.x);
         float s = 0.65;
-        float v = float(iterations)/float(maxIterations) - 0.25;
-        if (v < 0.5) {
+        float v = float(iterations)/float(maxIterations);
+        float a = v - 0.3;
+        if (a < 0.6) {
           discard;
         }
-        gl_FragColor = vec4(hsv2rgb(vec3(h,s,v)), v);
+        gl_FragColor = vec4(hsv2rgb(vec3(h,s,v)), a);
     }
 `;
 }
@@ -299,7 +300,7 @@ export const setupGL = (lejaStack, A_nStack) => {
     let A_n = A_nStack[key];
 
     const geometry = new THREE.PlaneBufferGeometry(2, 2);
-    geometry.translate(0, 0, parseInt(key) * 0.1);
+    // geometry.translate(0, 0, parseInt(key) * 0.1);
     const material = new THREE.ShaderMaterial({
       uniforms: {
         an: { value: A_n },
@@ -343,6 +344,9 @@ export const setupGL = (lejaStack, A_nStack) => {
       },
       vertexShader: vertexShader(),
       fragmentShader: fragmentShader(),
+      depthTest: false,
+      depthWrite: false,
+      transparent: true,
     });
 
     const panel = new THREE.Mesh(geometry, material);

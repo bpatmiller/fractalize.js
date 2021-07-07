@@ -1,7 +1,27 @@
 import { handleImage } from "./image.js";
-import { makePane } from "./config.js";
+import { makePane, PARAMS } from "./config.js";
 import { setupGL } from "./gl.js";
 const [pane, fpsGraph] = makePane();
+
+const init = async (file) => {
+  const [lejaStack, A_nStack, centers, colors, setSizes] = await handleImage(
+    file,
+    imgParamUrl
+  );
+  setupGL(lejaStack, A_nStack, centers, colors, setSizes, fpsGraph);
+};
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+
+const imgParamUrl = urlParams.get("img");
+const nC = urlParams.get("nc");
+if (nC != null) {
+  PARAMS.numColors = parseInt(nC);
+}
+if (imgParamUrl != null) {
+  init(null, imgParamUrl);
+}
 
 var dropZone = document.getElementById("drop");
 
@@ -25,10 +45,7 @@ dropZone.addEventListener("drop", async function (e) {
         e.dataTransfer.items[i].type.match("^image/")
       ) {
         var file = e.dataTransfer.items[i].getAsFile();
-        const [lejaStack, A_nStack, centers, setSizes] = await handleImage(
-          file
-        );
-        setupGL(lejaStack, A_nStack, centers, setSizes, fpsGraph);
+        init(file);
       }
     }
   }

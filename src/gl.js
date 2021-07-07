@@ -1,7 +1,7 @@
 import { Complex } from "complex.js";
 import * as THREE from "three";
 import { PARAMS } from "./config";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 // panels is a jank global object of shaders on panels
 // similarly, targets is a bunch of render textures which will later be composed
@@ -34,6 +34,7 @@ function fragmentShader() {
     uniform int maxIterations;
     uniform float scale;
     uniform vec2 origin;
+    uniform vec3 color;
 
     uniform vec2 l1;
     uniform vec2 l2;
@@ -153,7 +154,7 @@ function fragmentShader() {
     }
 
     void main() {
-        vec2 z = (vec2(vUv.x, -vUv.y) - origin) / (scale + 0.1 * sin(0.025 * time));
+        vec2 z = (vec2(vUv.x, -vUv.y) - origin) / (scale + 0.05 * sin(0.35 * time));
         float len = 0.0;
         int iterations = 0;
         for (;iterations < maxIterations; iterations++) {
@@ -164,14 +165,14 @@ function fragmentShader() {
             len += length(z - tmp);
             z = tmp;
         }
-        float h =  0.5 * sin(time * 0.01) + random(an + l1.y);//random(l2.y + l2.x);
-        float s = 0.65;
+        // float h =  0.5 * sin(time * 0.01) + random(an + l1.y);//random(l2.y + l2.x);
+        // float s = 0.65;
         float v = float(iterations)/float(maxIterations);
-        float a = v - 0.3;
+        float a = v - 0.2;
         if (a < 0.1) {
           discard;
         }
-        gl_FragColor = vec4(hsv2rgb(vec3(h,s,v)), a);
+        gl_FragColor = vec4(color, a);
     }
 `;
 }
@@ -274,7 +275,7 @@ const setupRenderer = () => {
 
   camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
 
-  controls = new OrbitControls(camera, renderer.domElement);
+  // controls = new OrbitControls(camera, renderer.domElement);
 
   camera.position.z = 3;
 };
@@ -283,7 +284,14 @@ export const clearPanels = () => {
   panels.clear();
 };
 
-export const setupGL = (lejaStack, A_nStack, centers, setSizes, fpsGraph) => {
+export const setupGL = (
+  lejaStack,
+  A_nStack,
+  centers,
+  colors,
+  setSizes,
+  fpsGraph
+) => {
   if (panels.length > 0) {
     updateStackUniforms(lejaStack, A_nStack);
     return;
@@ -313,6 +321,7 @@ export const setupGL = (lejaStack, A_nStack, centers, setSizes, fpsGraph) => {
     let A_n = A_nStack[key];
     let center = centers[key];
     let setSize = setSizes[key];
+    let color = colors[key];
 
     const geometry = new THREE.PlaneBufferGeometry(2, 2);
     geometry.translate(0, 0, -0.1 * (setSize / maxSetSize));
@@ -323,6 +332,7 @@ export const setupGL = (lejaStack, A_nStack, centers, setSizes, fpsGraph) => {
         time: { value: 0.0 },
         maxIterations: { value: 64 },
         scale: { value: 1.0 },
+        color: { value: new THREE.Vector3(color[0], color[1], color[2]) },
         origin: { value: new THREE.Vector2(center.re, center.im) },
         l1: { value: new THREE.Vector2() },
         l2: { value: new THREE.Vector2() },
@@ -368,7 +378,6 @@ export const setupGL = (lejaStack, A_nStack, centers, setSizes, fpsGraph) => {
     scene.add(panel);
     panels[key] = panel;
     updateUniforms(key, A_n, lejaPoints.length, lejaPoints);
-    console.log("updated uniforms");
 
     // scenes[key] = scene;
     // const renderTarget = new THREE.WebGLRenderTarget(renderWidth, renderHeight);
@@ -388,7 +397,7 @@ export const setupGL = (lejaStack, A_nStack, centers, setSizes, fpsGraph) => {
     for (let key in panels) {
       panels[key].material.uniforms.time.value += 0.01;
     }
-    controls.update();
+    // controls.update();
     renderer.render(scene, camera);
     fpsGraph.end();
   }

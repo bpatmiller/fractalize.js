@@ -15,6 +15,7 @@ const drawCanvasFromURL = (dataURL) =>
     const canvas = document.getElementById("resized");
     const ctx = canvas.getContext("2d");
     const img = new Image();
+    img.setAttribute("crossOrigin", "");
     img.onload = () => {
       let mainAxis = Math.max(img.width, img.height);
       let w = Math.floor(img.width * (PARAMS.outputSize / mainAxis));
@@ -30,11 +31,16 @@ const drawCanvasFromURL = (dataURL) =>
     img.src = dataURL;
   });
 
-export const handleImage = async (file) => {
+export const handleImage = async (file, remoteUrl) => {
   const canvas = document.getElementById("resized");
   const ctx = canvas.getContext("2d");
+  let srcImgUrl;
+  if (remoteUrl != null) {
+    srcImgUrl = remoteUrl;
+  } else {
+    srcImgUrl = URL.createObjectURL(file);
+  }
 
-  const srcImgUrl = URL.createObjectURL(file);
   const dim = await drawCanvasFromURL(srcImgUrl);
 
   const rendererContainer = document.getElementById("fractal");
@@ -56,8 +62,6 @@ export const handleImage = async (file) => {
       }
     }
   }
-  console.log(imgTData);
-  console.log(imgT);
 
   // segment and draw over
   let pipeline = imgT;
@@ -106,14 +110,28 @@ export const handleImage = async (file) => {
     return count;
   }
 
+  // find avg rgb color of each group
+  var colors = {};
   function replaceCluster(sub, g) {
     for (let x = 0; x < dim.width; x++) {
       for (let y = 0; y < dim.height; y++) {
-        if (groups.get(x, y) == sub) groups.set(x, y, g);
+        if (groups.get(x, y) == sub) {
+          groups.set(x, y, g);
+          if (colors[g] == null) {
+            colors[g] = [
+              imgT.get(x, y, 0),
+              imgT.get(x, y, 1),
+              imgT.get(x, y, 2),
+            ];
+          } else {
+            colors[g][0] += imgT.get(x, y, 0);
+            colors[g][1] += imgT.get(x, y, 1);
+            colors[g][2] += imgT.get(x, y, 2);
+          }
+        }
       }
     }
   }
-
   // find connected clusters
   var groupIndex = 0;
   var validGroups = 0;
@@ -129,6 +147,11 @@ export const handleImage = async (file) => {
         ) {
           validGroups++;
           replaceCluster(255, validGroups);
+          // take avg pixel vals
+          colors[validGroups][0] /= 255.0 * count;
+          colors[validGroups][1] /= 255.0 * count;
+          colors[validGroups][2] /= 255.0 * count;
+
           setSizes[validGroups] = count;
         }
       }
@@ -159,21 +182,21 @@ export const handleImage = async (file) => {
   }
 
   ctx.fillStyle = `rgba(255,255,255,0.85)`;
-  // ctx.fillRect(0, 0, dim.width, dim.height);
+  ctx.fillRect(0, 0, dim.width, dim.height);
 
   // draw over group colors, then white over, then draw outlines
-  // for (let x = 0; x < dim.width; x++) {
-  //   for (let y = 0; y < dim.height; y++) {
-  //     if (groups.get(x, y) != 255) {
-  //       let gn = groups.get(x, y);
-  //       let r = Math.floor(Math.sin(gn) * 80) + 100;
-  //       let b = Math.floor(Math.cos(gn + 0.5) * 80) + 100;
-  //       let g = 240 - b;
-  //       ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
-  //       ctx.fillRect(y, x, 1, 1);
-  //     }
-  //   }
-  // }
+  for (let x = 0; x < dim.width; x++) {
+    for (let y = 0; y < dim.height; y++) {
+      if (groups.get(x, y) != 255) {
+        let gn = groups.get(x, y);
+        let r = Math.floor(Math.sin(10 * gn) * 80) + 100;
+        let b = Math.floor(Math.cos(10 * gn + 0.5) * 80) + 100;
+        let g = 240 - b;
+        ctx.fillStyle = `rgba(${r},${g},${b},0.3)`;
+        ctx.fillRect(x, y, 1, 1);
+      }
+    }
+  }
 
   for (let x = 0; x < dim.width; x++) {
     for (let y = 0; y < dim.height; y++) {
@@ -193,5 +216,5 @@ export const handleImage = async (file) => {
   const lejaStack = getLejaPoints(complexPoints);
   const A_nStack = getA_nStack(lejaStack);
   // at this point we are done with the precomputation and ready to render
-  return [lejaStack, A_nStack, centers, setSizes];
+  return [lejaStack, A_nStack, centers, colors, setSizes];
 };

@@ -100,7 +100,6 @@ const findCenter = (complexList) => {
 };
 
 export const getLejaPoints = (complexPoints) => {
-  console.log(complexPoints);
   let lejaStack = {};
   for (var key in complexPoints) {
     const group = complexPoints[key];

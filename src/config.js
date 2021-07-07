@@ -1,5 +1,6 @@
 import { Pane } from "../_snowpack/pkg/tweakpane.js";
 import { updateControlUniforms } from "./gl.js";
+import * as EssentialsPlugin from "../_snowpack/pkg/@tweakpane/plugin-essentials.js";
 
 export const PARAMS = {
   outputSize: 260,
@@ -19,6 +20,7 @@ export const makePane = () => {
     title: "Parameters",
     expanded: false,
   });
+  pane.registerPlugin(EssentialsPlugin);
 
   PARAMS.outputSize = Math.floor(window.innerWidth / 2) - 64;
 
@@ -47,5 +49,10 @@ export const makePane = () => {
 
   pane.addMonitor(PARAMS, "numValidSubsets");
   pane.addMonitor(PARAMS, "edgePoints");
-  return pane;
+  pane.addSeparator();
+  const fpsGraph = pane.addBlade({
+    view: "fpsgraph",
+    label: "fpsgraph",
+  });
+  return [pane, fpsGraph];
 };

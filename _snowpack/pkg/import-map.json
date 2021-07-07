@@ -1,5 +1,6 @@
 {
   "imports": {
+    "@tweakpane/plugin-essentials": "./@tweakpane/plugin-essentials.js",
     "complex.js": "./complexjs.js",
     "gammacv": "./gammacv.js",
     "three": "./three.js",

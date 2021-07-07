@@ -9,5 +9,5 @@ rm -rf ../build
 cp -r build/ ../build/
 npm run build
 cp ../build/.git build/
-cd $directory && git add -all && git commit -m "deploy" && git push origin $branch
+cd $directory && git add --all && git commit -m "deploy" && git push origin $branch
 git worktree remove $directory

@@ -151,7 +151,7 @@ function fragmentShader() {
     }
 
     void main() {
-        vec2 z = (vec2(-vUv.y, vUv.x) + origin.yx) / scale;
+        vec2 z = (vec2(-vUv.y, vUv.x) - origin.yx) / scale;
         float len = 0.0;
         int iterations = 0;
         for (;iterations < maxIterations; iterations++) {
@@ -166,10 +166,10 @@ function fragmentShader() {
         float s = 0.65;
         float v = float(iterations)/float(maxIterations);
         float a = v - 0.3;
-        if (a < 0.6) {
-          discard;
-        }
-        gl_FragColor = vec4(hsv2rgb(vec3(h,s,v)), a);
+        // if (a < 0.6) {
+        //   discard;
+        // }
+        gl_FragColor = vec4(hsv2rgb(vec3(1.0,s,1.0)), 0.8);
     }
 `;
 }
@@ -278,7 +278,7 @@ export const clearPanels = () => {
   panels.clear();
 };
 
-export const setupGL = (lejaStack, A_nStack) => {
+export const setupGL = (lejaStack, A_nStack, centers) => {
   if (panels.length > 0) {
     updateStackUniforms(lejaStack, A_nStack);
     return;
@@ -293,11 +293,10 @@ export const setupGL = (lejaStack, A_nStack) => {
   // }
   scene = new THREE.Scene();
 
-  const [renderWidth, renderHeight] = getRenderDimensions();
-
   for (let key in lejaStack) {
     let lejaPoints = lejaStack[key];
     let A_n = A_nStack[key];
+    let center = centers[key];
 
     const geometry = new THREE.PlaneBufferGeometry(2, 2);
     // geometry.translate(0, 0, parseInt(key) * 0.1);

@@ -27,8 +27,8 @@ dropZone.addEventListener("drop", async function (e) {
         e.dataTransfer.items[i].type.match("^image/")
       ) {
         var file = e.dataTransfer.items[i].getAsFile();
-        const [lejaStack, A_nStack] = await handleImage(file);
-        setupGL(lejaStack, A_nStack);
+        const [lejaStack, A_nStack, centers] = await handleImage(file);
+        setupGL(lejaStack, A_nStack, centers);
       }
     }
   }

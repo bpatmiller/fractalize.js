@@ -173,10 +173,10 @@ export const handleImage = async (file) => {
     }
   }
 
-  const complexPoints = getComplexPoints(groupEdges);
+  const [complexPoints, centers] = getComplexPoints(groupEdges);
 
   const lejaStack = getLejaPoints(complexPoints);
   const A_nStack = getA_nStack(lejaStack);
   // at this point we are done with the precomputation and ready to render
-  return [lejaStack, A_nStack];
+  return [lejaStack, A_nStack, centers];
 };

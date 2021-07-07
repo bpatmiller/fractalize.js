@@ -6,6 +6,7 @@ import { PARAMS } from "./config";
 export const getComplexPoints = (groupEdges) => {
   // a tensor with either 255 for invalid points,
   // or some number >= 1 and < 255 for valid points/groups
+  let centers = {};
 
   const [w, h, _] = groupEdges.shape;
   const majorAxis = Math.max(w, h);
@@ -37,7 +38,25 @@ export const getComplexPoints = (groupEdges) => {
   // "edge pixel percent"
   let epp = Math.floor((100 * edgePointCount) / (w * h));
   PARAMS.edgePoints = `${edgePointCount} / ${w * h} (${epp}%)`;
-  return edgePoints;
+
+  // center each group about the origin,
+  for (let key in edgePoints) {
+    let center = findCenter(edgePoints[key]);
+    centers[key] = center;
+    for (let i = 0; i < edgePoints[key].length; i++) {
+      edgePoints[key][i] = edgePoints[key][i].sub(center);
+    }
+  }
+  console.log(edgePoints, centers);
+
+  // for (let key in edgePoints) {
+  //   let sum = new Complex(0);
+  //   for (let i = 0; i < edgePoints[key].length; i++) {
+  //     sum = sum.add(edgePoints[key][i]);
+  //   }
+  //   console.log(key, sum);
+  // }
+  return [edgePoints, centers];
 };
 
 const PI_Z = (lejaPoints, group, s) => {
@@ -85,12 +104,6 @@ export const getLejaPoints = (edgePoints) => {
   let lejaStack = {};
   for (var key in edgePoints) {
     const group = edgePoints[key];
-    // temporarily "center" the group,
-    // then shift it back after leja points are found
-    let center = findCenter(group);
-    for (let i = 0; i < group.length; i++) {
-      group[i] = group[i].sub(center);
-    }
 
     const n = Math.min(PARAMS.numLejaPoints, Math.floor(group.length / 2));
     let lejaPoints = [];
@@ -108,11 +121,6 @@ export const getLejaPoints = (edgePoints) => {
       lejaPoints.push(group[smax]);
       group.splice(smax, 1);
     }
-    // now "shift back" the points
-    for (let i = 0; i < lejaPoints.length; i++) {
-      lejaPoints[i] = lejaPoints[i].add(center);
-    }
-    lejaStack[key] = lejaPoints;
   }
   return lejaStack;
 };

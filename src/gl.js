@@ -274,6 +274,8 @@ const setupRenderer = () => {
     alpha: true,
     depth: false,
   });
+  renderer.setClearColor(0x1e1e1e, 1);
+
   const rendererContainer = document.getElementById("fractal");
   renderer.setSize(renderWidth, renderHeight);
   rendererContainer.appendChild(renderer.domElement);

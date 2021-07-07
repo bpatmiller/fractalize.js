@@ -22,11 +22,15 @@ const init = async (file) => {
 
 const nC = urlParams.get("nc");
 const nL = urlParams.get("nl");
+const mI = urlParams.get("mi");
+if (nC != null) {
+  PARAMS.numColors = parseInt(nC);
+}
 if (nL != null) {
   PARAMS.numLejaPoints = parseInt(nL);
 }
-if (nC != null) {
-  PARAMS.numColors = parseInt(nC);
+if (mI != null) {
+  PARAMS.maxIterations = parseInt(mI);
 }
 if (imgParamUrl != null) {
   init(null, imgParamUrl);

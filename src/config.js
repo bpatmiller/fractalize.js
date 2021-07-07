@@ -4,13 +4,13 @@ import { updateControlUniforms } from "./gl.js";
 export const PARAMS = {
   outputSize: 260,
   minClusterSize: 0.03,
-  numColors: 2,
+  numColors: 4,
   numValidSubsets: "",
   edgePoints: "",
   scale: 1.0,
   origin: { x: 0.0, y: 0.0 },
   numLejaPoints: 32,
-  maxIterations: 64,
+  maxIterations: 4,
 };
 
 export const makePane = () => {

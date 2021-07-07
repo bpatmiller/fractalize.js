@@ -2,7 +2,15 @@ import { Complex } from "complex.js";
 import * as THREE from "three";
 import { PARAMS } from "./config";
 
-let scene, camera, renderer, material;
+// panels is a jank global object of shaders on panels
+// similarly, targets is a bunch of render textures which will later be composed
+let renderer, camera;
+let panels = {};
+let targets = {};
+let scenes = {};
+let displayScene;
+let displayPanel;
+let scene;
 
 function vertexShader() {
   return `
@@ -154,24 +162,31 @@ function fragmentShader() {
             len += length(z - tmp);
             z = tmp;
         }
-        float h = 0.75;
+        float h =  random(an);//random(l2.y + l2.x);
         float s = 0.65;
-        float v = float(iterations)/float(maxIterations);
+        float v = float(iterations)/float(maxIterations) - 0.25;
+        if (v < 0.5) {
+          discard;
+        }
         gl_FragColor = vec4(hsv2rgb(vec3(h,s,v)), v);
     }
 `;
 }
 
 export const updateControlUniforms = () => {
-  if (material == null) return;
-  material.uniforms.maxIterations.value = PARAMS.maxIterations;
-  material.uniforms.scale.value = PARAMS.scale;
-  material.uniforms.origin.value.x = PARAMS.origin.x;
-  material.uniforms.origin.value.y = PARAMS.origin.y;
-  console.log("updated iterations");
+  if (panels.length == 0) return;
+  for (let key in panels) {
+    let material = panels[key].material;
+    material.uniforms.maxIterations.value = PARAMS.maxIterations;
+    material.uniforms.scale.value = PARAMS.scale;
+    material.uniforms.origin.value.x = PARAMS.origin.x;
+    material.uniforms.origin.value.y = PARAMS.origin.y;
+  }
 };
 
-const updateUniforms = (an, nl, lejaPoints) => {
+const updateUniforms = (panelIndex, an, nl, lejaPoints) => {
+  let material = panels[panelIndex].material;
+
   material.uniforms.an.value = an;
   material.uniforms.nl.value = nl;
   material.uniforms.maxIterations.value = PARAMS.maxIterations;
@@ -217,90 +232,139 @@ const updateUniforms = (an, nl, lejaPoints) => {
   updateLejaUniform(material.uniforms.l32, 31);
 };
 
-export const setupGL = (lejaStack, A_nStack) => {
-  // declare leja points, a_n as uniforms
-  // keep 256 possible leja points, or 8 * 32
-
-  // prepare to pass the uniforms
-  const lejaPoints = lejaStack[Object.keys(lejaStack)[0]];
-  const A_n = A_nStack[Object.keys(A_nStack)[0]];
-  console.log(Object.keys(A_nStack));
-  const numLejaPoints = lejaPoints.length;
-
-  if (renderer != null) {
-    updateUniforms(A_n, numLejaPoints, lejaPoints);
-    return;
+const updateStackUniforms = (lejaStack, A_nStack) => {
+  for (let key in lejaStack) {
+    updateUniforms(
+      panels[key],
+      A_nStack[key],
+      lejaStack[key].length,
+      lejaStack[key]
+    );
   }
-  scene = new THREE.Scene();
-  camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+};
 
+const getRenderDimensions = () => {
   const sourceContainer = document.getElementById("resized");
   const renderWidth = sourceContainer.width;
   const renderHeight = sourceContainer.height;
+  return [renderWidth, renderHeight];
+};
 
-  renderer = new THREE.WebGLRenderer();
+// const setupDisplayScene = () => {
+//   displayScene = new THREE.Scene();
+//   const geometry = new THREE.PlaneBufferGeometry(2, 2);
+//   const material = new THREE.MeshBasicMaterial
+//   displayPanel = new THREE.Mesh(geometry, material);
+
+// }
+
+const setupRenderer = () => {
+  const [renderWidth, renderHeight] = getRenderDimensions();
+
+  renderer = new THREE.WebGLRenderer({
+    alpha: true,
+    depth: false,
+  });
   const rendererContainer = document.getElementById("fractal");
   renderer.setSize(renderWidth, renderHeight);
   rendererContainer.appendChild(renderer.domElement);
-  console.log("appending renderer");
 
-  const geometry = new THREE.PlaneBufferGeometry(2, 2);
-  material = new THREE.ShaderMaterial({
-    uniforms: {
-      // for now we will just manually have 16 allocations for leja points
-      an: { value: A_n },
-      nl: { value: numLejaPoints },
-      time: { value: 0.0 },
-      maxIterations: { value: 64 },
-      scale: { value: 1.0 },
-      origin: { value: new THREE.Vector2() },
-      l1: { value: new THREE.Vector2() },
-      l2: { value: new THREE.Vector2() },
-      l3: { value: new THREE.Vector2() },
-      l4: { value: new THREE.Vector2() },
-      l5: { value: new THREE.Vector2() },
-      l6: { value: new THREE.Vector2() },
-      l7: { value: new THREE.Vector2() },
-      l8: { value: new THREE.Vector2() },
-      l9: { value: new THREE.Vector2() },
-      l10: { value: new THREE.Vector2() },
-      l11: { value: new THREE.Vector2() },
-      l12: { value: new THREE.Vector2() },
-      l13: { value: new THREE.Vector2() },
-      l14: { value: new THREE.Vector2() },
-      l15: { value: new THREE.Vector2() },
-      l16: { value: new THREE.Vector2() },
-      l17: { value: new THREE.Vector2() },
-      l18: { value: new THREE.Vector2() },
-      l19: { value: new THREE.Vector2() },
-      l20: { value: new THREE.Vector2() },
-      l21: { value: new THREE.Vector2() },
-      l22: { value: new THREE.Vector2() },
-      l23: { value: new THREE.Vector2() },
-      l24: { value: new THREE.Vector2() },
-      l25: { value: new THREE.Vector2() },
-      l26: { value: new THREE.Vector2() },
-      l27: { value: new THREE.Vector2() },
-      l28: { value: new THREE.Vector2() },
-      l29: { value: new THREE.Vector2() },
-      l30: { value: new THREE.Vector2() },
-      l31: { value: new THREE.Vector2() },
-      l32: { value: new THREE.Vector2() },
-    },
-    vertexShader: vertexShader(),
-    fragmentShader: fragmentShader(),
-  });
+  camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
+  camera.position.z = 3;
+};
 
-  updateUniforms(A_n, numLejaPoints, lejaPoints);
-  console.log("updated uniforms");
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
+export const clearPanels = () => {
+  panels.clear();
+};
 
-  camera.position.z = 5;
+export const setupGL = (lejaStack, A_nStack) => {
+  if (panels.length > 0) {
+    updateStackUniforms(lejaStack, A_nStack);
+    return;
+  }
+
+  if (renderer == null) {
+    setupRenderer();
+  }
+
+  // if (displayScene == null) {
+  //   setupDisplayScene();
+  // }
+  scene = new THREE.Scene();
+
+  const [renderWidth, renderHeight] = getRenderDimensions();
+
+  for (let key in lejaStack) {
+    let lejaPoints = lejaStack[key];
+    let A_n = A_nStack[key];
+
+    const geometry = new THREE.PlaneBufferGeometry(2, 2);
+    geometry.translate(0, 0, parseInt(key) * 0.1);
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        an: { value: A_n },
+        nl: { value: lejaPoints.length },
+        time: { value: 0.0 },
+        maxIterations: { value: 64 },
+        scale: { value: 1.0 },
+        origin: { value: new THREE.Vector2() },
+        l1: { value: new THREE.Vector2() },
+        l2: { value: new THREE.Vector2() },
+        l3: { value: new THREE.Vector2() },
+        l4: { value: new THREE.Vector2() },
+        l5: { value: new THREE.Vector2() },
+        l6: { value: new THREE.Vector2() },
+        l7: { value: new THREE.Vector2() },
+        l8: { value: new THREE.Vector2() },
+        l9: { value: new THREE.Vector2() },
+        l10: { value: new THREE.Vector2() },
+        l11: { value: new THREE.Vector2() },
+        l12: { value: new THREE.Vector2() },
+        l13: { value: new THREE.Vector2() },
+        l14: { value: new THREE.Vector2() },
+        l15: { value: new THREE.Vector2() },
+        l16: { value: new THREE.Vector2() },
+        l17: { value: new THREE.Vector2() },
+        l18: { value: new THREE.Vector2() },
+        l19: { value: new THREE.Vector2() },
+        l20: { value: new THREE.Vector2() },
+        l21: { value: new THREE.Vector2() },
+        l22: { value: new THREE.Vector2() },
+        l23: { value: new THREE.Vector2() },
+        l24: { value: new THREE.Vector2() },
+        l25: { value: new THREE.Vector2() },
+        l26: { value: new THREE.Vector2() },
+        l27: { value: new THREE.Vector2() },
+        l28: { value: new THREE.Vector2() },
+        l29: { value: new THREE.Vector2() },
+        l30: { value: new THREE.Vector2() },
+        l31: { value: new THREE.Vector2() },
+        l32: { value: new THREE.Vector2() },
+      },
+      vertexShader: vertexShader(),
+      fragmentShader: fragmentShader(),
+    });
+
+    const panel = new THREE.Mesh(geometry, material);
+    scene.add(panel);
+    panels[key] = panel;
+    updateUniforms(key, A_n, lejaPoints.length, lejaPoints);
+    console.log("updated uniforms");
+
+    // scenes[key] = scene;
+    // const renderTarget = new THREE.WebGLRenderTarget(renderWidth, renderHeight);
+    // targets[key] = renderTarget;
+    // console.log("created render targets");
+  }
 
   function animate() {
     requestAnimationFrame(animate);
-    material.uniforms.time.value += 0.01;
+    // for (let key in panels) {
+    //   renderer.setRenderTarget(targets[key]);
+    //   renderer.render(scenes[key], camera);
+    // }
+    // renderer.setRenderTarget(null);
+    // renderer.render(displayScene, camera);
     renderer.render(scene, camera);
   }
   animate();

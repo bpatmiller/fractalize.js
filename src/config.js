@@ -10,7 +10,7 @@ export const PARAMS = {
   scale: 1.0,
   origin: { x: 0.0, y: 0.0 },
   numLejaPoints: 32,
-  maxIterations: 64,
+  maxIterations: 8,
 };
 
 export const makePane = () => {

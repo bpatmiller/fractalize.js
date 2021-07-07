@@ -1,4 +1,4 @@
-node_modules/
+**/node_modules/
 *.png
 package-lock.json
 todo.md

@@ -104,6 +104,7 @@ export const handleImage = async (file) => {
   // find connected clusters
   var groupIndex = 0;
   var validGroups = 0;
+  var setSizes = {};
   for (let x = 0; x < dim.width; x++) {
     for (let y = 0; y < dim.height; y++) {
       if (groups.get(x, y) == 0) {
@@ -115,6 +116,7 @@ export const handleImage = async (file) => {
         ) {
           validGroups++;
           replaceCluster(255, validGroups);
+          setSizes[validGroups] = count;
         }
       }
     }
@@ -178,5 +180,5 @@ export const handleImage = async (file) => {
   const lejaStack = getLejaPoints(complexPoints);
   const A_nStack = getA_nStack(lejaStack);
   // at this point we are done with the precomputation and ready to render
-  return [lejaStack, A_nStack, centers];
+  return [lejaStack, A_nStack, centers, setSizes];
 };

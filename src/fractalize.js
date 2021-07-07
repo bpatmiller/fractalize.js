@@ -20,43 +20,42 @@ export const getComplexPoints = (groupEdges) => {
   }
 
   let edgePointCount = 0;
-  let edgePoints = {};
-  const borderSize = 1;
+  let complexPoints = {};
+  const borderSize = 0;
   for (let x = borderSize; x < w - borderSize; x++) {
     for (let y = borderSize; y < h - borderSize; y++) {
       let gn = groupEdges.get(x, y);
       if (gn != 255) {
         edgePointCount++;
-        if (edgePoints[gn] != null) {
-          edgePoints[gn].push(pixelsToComplex(x, y));
+        if (complexPoints[gn] != null) {
+          complexPoints[gn].push(pixelsToComplex(x, y));
         } else {
-          edgePoints[gn] = [pixelsToComplex(x, y)];
+          complexPoints[gn] = [pixelsToComplex(x, y)];
         }
       }
     }
   }
   // "edge pixel percent"
   let epp = Math.floor((100 * edgePointCount) / (w * h));
-  PARAMS.edgePoints = `${edgePointCount} / ${w * h} (${epp}%)`;
+  PARAMS.complexPoints = `${edgePointCount} / ${w * h} (${epp}%)`;
 
   // center each group about the origin,
-  for (let key in edgePoints) {
-    let center = findCenter(edgePoints[key]);
+  for (let key in complexPoints) {
+    let center = findCenter(complexPoints[key]);
     centers[key] = center;
-    for (let i = 0; i < edgePoints[key].length; i++) {
-      edgePoints[key][i] = edgePoints[key][i].sub(center);
+    for (let i = 0; i < complexPoints[key].length; i++) {
+      complexPoints[key][i] = complexPoints[key][i].sub(center);
     }
   }
-  console.log(edgePoints, centers);
 
-  // for (let key in edgePoints) {
+  // for (let key in complexPoints) {
   //   let sum = new Complex(0);
-  //   for (let i = 0; i < edgePoints[key].length; i++) {
-  //     sum = sum.add(edgePoints[key][i]);
+  //   for (let i = 0; i < complexPoints[key].length; i++) {
+  //     sum = sum.add(complexPoints[key][i]);
   //   }
   //   console.log(key, sum);
   // }
-  return [edgePoints, centers];
+  return [complexPoints, centers];
 };
 
 const PI_Z = (lejaPoints, group, s) => {
@@ -100,10 +99,11 @@ const findCenter = (complexList) => {
   return new Complex(x, y);
 };
 
-export const getLejaPoints = (edgePoints) => {
+export const getLejaPoints = (complexPoints) => {
+  console.log(complexPoints);
   let lejaStack = {};
-  for (var key in edgePoints) {
-    const group = edgePoints[key];
+  for (var key in complexPoints) {
+    const group = complexPoints[key];
 
     const n = Math.min(PARAMS.numLejaPoints, Math.floor(group.length / 2));
     let lejaPoints = [];
@@ -121,6 +121,7 @@ export const getLejaPoints = (edgePoints) => {
       lejaPoints.push(group[smax]);
       group.splice(smax, 1);
     }
+    lejaStack[key] = lejaPoints;
   }
   return lejaStack;
 };

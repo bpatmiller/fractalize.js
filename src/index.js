@@ -7,7 +7,8 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 let imgParamUrl = urlParams.get("img");
 if (imgParamUrl == null) {
-  imgParamUrl = "https://i.imgur.com/uy0DBkZ.png";
+  // imgParamUrl = "https://i.imgur.com/uy0DBkZ.png";
+  imgParamUrl = "https://source.unsplash.com/random/?cat";
 }
 const init = async (file) => {
   let ipu = null;

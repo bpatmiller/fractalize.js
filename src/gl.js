@@ -67,8 +67,40 @@ function fragmentShader() {
     uniform vec2 l29;
     uniform vec2 l30;
     uniform vec2 l31;
-    uniform vec2 l32;
-    
+    uniform vec2 l32; 
+    uniform vec2 l33;
+    uniform vec2 l34;
+    uniform vec2 l35;
+    uniform vec2 l36;
+    uniform vec2 l37;
+    uniform vec2 l38;
+    uniform vec2 l39;
+    uniform vec2 l40;
+    uniform vec2 l41;
+    uniform vec2 l42;
+    uniform vec2 l43;
+    uniform vec2 l44;
+    uniform vec2 l45;
+    uniform vec2 l46;
+    uniform vec2 l47;
+    uniform vec2 l48;
+    uniform vec2 l49;
+    uniform vec2 l50;
+    uniform vec2 l51;
+    uniform vec2 l52;
+    uniform vec2 l53;
+    uniform vec2 l54;
+    uniform vec2 l55;
+    uniform vec2 l56;
+    uniform vec2 l57;
+    uniform vec2 l58;
+    uniform vec2 l59;
+    uniform vec2 l60;
+    uniform vec2 l61;
+    uniform vec2 l62;
+    uniform vec2 l63;
+    uniform vec2 l64;
+
     varying vec3 vUv;
 
     // from https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
@@ -139,7 +171,39 @@ function fragmentShader() {
         p = lejaStep(z,p,l29,29);
         p = lejaStep(z,p,l30,30);
         p = lejaStep(z,p,l31,31);
-        p = lejaStep(z,p,l32,32);
+        p = lejaStep(z,p,l32,32); 
+        p = lejaStep(z,p,l33,33);
+        p = lejaStep(z,p,l34,34);
+        p = lejaStep(z,p,l35,35);
+        p = lejaStep(z,p,l36,36);
+        p = lejaStep(z,p,l37,37);
+        p = lejaStep(z,p,l38,38);
+        p = lejaStep(z,p,l39,39);
+        p = lejaStep(z,p,l40,40);
+        p = lejaStep(z,p,l41,41);
+        p = lejaStep(z,p,l42,42);
+        p = lejaStep(z,p,l43,43);
+        p = lejaStep(z,p,l44,44);
+        p = lejaStep(z,p,l45,45);
+        p = lejaStep(z,p,l46,46);
+        p = lejaStep(z,p,l47,47);
+        p = lejaStep(z,p,l48,48);
+        p = lejaStep(z,p,l49,49);
+        p = lejaStep(z,p,l50,50);
+        p = lejaStep(z,p,l51,51);
+        p = lejaStep(z,p,l52,52);
+        p = lejaStep(z,p,l53,53);
+        p = lejaStep(z,p,l54,54);
+        p = lejaStep(z,p,l55,55);
+        p = lejaStep(z,p,l56,56);
+        p = lejaStep(z,p,l57,57);
+        p = lejaStep(z,p,l58,58);
+        p = lejaStep(z,p,l59,59);
+        p = lejaStep(z,p,l60,60);
+        p = lejaStep(z,p,l61,61);
+        p = lejaStep(z,p,l62,62);
+        p = lejaStep(z,p,l63,63);
+        p = lejaStep(z,p,l64,64);
 
         float scale = exp(0.5) / an;
         return vec2(p.x*z.x - p.y*z.y, p.x*z.y + p.y*z.x) * scale;
@@ -234,6 +298,38 @@ const updateUniforms = (panelIndex, an, nl, lejaPoints) => {
   updateLejaUniform(material.uniforms.l30, 29);
   updateLejaUniform(material.uniforms.l31, 30);
   updateLejaUniform(material.uniforms.l32, 31);
+  updateLejaUniform(material.uniforms.l33, 32);
+  updateLejaUniform(material.uniforms.l34, 33);
+  updateLejaUniform(material.uniforms.l35, 34);
+  updateLejaUniform(material.uniforms.l36, 35);
+  updateLejaUniform(material.uniforms.l37, 36);
+  updateLejaUniform(material.uniforms.l38, 37);
+  updateLejaUniform(material.uniforms.l39, 38);
+  updateLejaUniform(material.uniforms.l40, 39);
+  updateLejaUniform(material.uniforms.l41, 40);
+  updateLejaUniform(material.uniforms.l42, 41);
+  updateLejaUniform(material.uniforms.l43, 42);
+  updateLejaUniform(material.uniforms.l44, 43);
+  updateLejaUniform(material.uniforms.l45, 44);
+  updateLejaUniform(material.uniforms.l46, 45);
+  updateLejaUniform(material.uniforms.l47, 46);
+  updateLejaUniform(material.uniforms.l48, 47);
+  updateLejaUniform(material.uniforms.l49, 48);
+  updateLejaUniform(material.uniforms.l50, 49);
+  updateLejaUniform(material.uniforms.l51, 50);
+  updateLejaUniform(material.uniforms.l52, 51);
+  updateLejaUniform(material.uniforms.l53, 52);
+  updateLejaUniform(material.uniforms.l54, 53);
+  updateLejaUniform(material.uniforms.l55, 54);
+  updateLejaUniform(material.uniforms.l56, 55);
+  updateLejaUniform(material.uniforms.l57, 56);
+  updateLejaUniform(material.uniforms.l58, 57);
+  updateLejaUniform(material.uniforms.l59, 58);
+  updateLejaUniform(material.uniforms.l60, 59);
+  updateLejaUniform(material.uniforms.l61, 60);
+  updateLejaUniform(material.uniforms.l62, 61);
+  updateLejaUniform(material.uniforms.l63, 62);
+  updateLejaUniform(material.uniforms.l64, 63);
 };
 
 const updateStackUniforms = (lejaStack, A_nStack) => {
@@ -337,7 +433,7 @@ export const setupGL = (
         an: { value: A_n },
         nl: { value: lejaPoints.length },
         time: { value: 0.0 },
-        maxIterations: { value: 64 },
+        maxIterations: { value: 8 },
         scale: { value: 1.0 },
         color: { value: new THREE.Vector3(color[0], color[1], color[2]) },
         origin: { value: new THREE.Vector2(center.re, center.im) },
@@ -373,6 +469,38 @@ export const setupGL = (
         l30: { value: new THREE.Vector2() },
         l31: { value: new THREE.Vector2() },
         l32: { value: new THREE.Vector2() },
+        l33: { value: new THREE.Vector2() },
+        l34: { value: new THREE.Vector2() },
+        l35: { value: new THREE.Vector2() },
+        l36: { value: new THREE.Vector2() },
+        l37: { value: new THREE.Vector2() },
+        l38: { value: new THREE.Vector2() },
+        l39: { value: new THREE.Vector2() },
+        l40: { value: new THREE.Vector2() },
+        l41: { value: new THREE.Vector2() },
+        l42: { value: new THREE.Vector2() },
+        l43: { value: new THREE.Vector2() },
+        l44: { value: new THREE.Vector2() },
+        l45: { value: new THREE.Vector2() },
+        l46: { value: new THREE.Vector2() },
+        l47: { value: new THREE.Vector2() },
+        l48: { value: new THREE.Vector2() },
+        l49: { value: new THREE.Vector2() },
+        l50: { value: new THREE.Vector2() },
+        l51: { value: new THREE.Vector2() },
+        l52: { value: new THREE.Vector2() },
+        l53: { value: new THREE.Vector2() },
+        l54: { value: new THREE.Vector2() },
+        l55: { value: new THREE.Vector2() },
+        l56: { value: new THREE.Vector2() },
+        l57: { value: new THREE.Vector2() },
+        l58: { value: new THREE.Vector2() },
+        l59: { value: new THREE.Vector2() },
+        l60: { value: new THREE.Vector2() },
+        l61: { value: new THREE.Vector2() },
+        l62: { value: new THREE.Vector2() },
+        l63: { value: new THREE.Vector2() },
+        l64: { value: new THREE.Vector2() },
       },
       vertexShader: vertexShader(),
       fragmentShader: fragmentShader(),

@@ -4,14 +4,14 @@ import * as EssentialsPlugin from "@tweakpane/plugin-essentials";
 
 export const PARAMS = {
   outputSize: 260,
-  minClusterSize: 0.01,
+  minClusterSize: 0.02,
   numColors: 4,
   numValidSubsets: "",
   edgePoints: "",
   scale: 1.0,
   origin: { x: 0.0, y: 0.0 },
   numLejaPoints: 32,
-  maxIterations: 4,
+  maxIterations: 8,
 };
 
 export const makePane = () => {
@@ -33,11 +33,11 @@ export const makePane = () => {
     step: 0.005,
   });
   pane.addInput(PARAMS, "numColors", { min: 2, max: 16, step: 1 });
-  pane.addInput(PARAMS, "numLejaPoints", { min: 4, max: 32, step: 1 });
+  pane.addInput(PARAMS, "numLejaPoints", { min: 4, max: 64, step: 1 });
   pane.addSeparator();
 
   pane
-    .addInput(PARAMS, "maxIterations", { min: 4, max: 128, step: 1 })
+    .addInput(PARAMS, "maxIterations", { min: 4, max: 64, step: 1 })
     .on("change", (ev) => {
       updateControlUniforms();
     });

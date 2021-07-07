@@ -154,7 +154,7 @@ function fragmentShader() {
     }
 
     void main() {
-        vec2 z = (vec2(vUv.x, -vUv.y) - origin) / (scale + 0.05 * sin(0.35 * time));
+        vec2 z = (vec2(vUv.x, -vUv.y) - origin) / (scale + 0.05 * sin(0.1 * time));
         float len = 0.0;
         int iterations = 0;
         for (;iterations < maxIterations; iterations++) {
@@ -249,8 +249,13 @@ const updateStackUniforms = (lejaStack, A_nStack) => {
 
 const getRenderDimensions = () => {
   const sourceContainer = document.getElementById("resized");
-  const renderWidth = sourceContainer.width;
-  const renderHeight = sourceContainer.height;
+  let renderWidth = Math.floor(sourceContainer.width);
+  let renderHeight = Math.floor(sourceContainer.height);
+  let xR = renderWidth / (window.innerWidth * 0.85);
+  let yR = renderHeight / (window.innerHeight * 0.85);
+  let expandRatio = Math.max(xR, yR);
+  renderWidth /= expandRatio;
+  renderHeight /= expandRatio;
   return [renderWidth, renderHeight];
 };
 

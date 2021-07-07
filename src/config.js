@@ -22,7 +22,9 @@ export const makePane = () => {
   });
   pane.registerPlugin(EssentialsPlugin);
 
-  PARAMS.outputSize = Math.floor(window.innerWidth / 2) - 64;
+  PARAMS.outputSize = Math.floor(
+    0.85 * Math.min(window.innerHeight, window.innerWidth)
+  );
 
   pane.addInput(PARAMS, "outputSize", { min: 256, max: 1024, step: 1 });
   pane.addInput(PARAMS, "minClusterSize", {

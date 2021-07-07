@@ -50,7 +50,9 @@
       }
       .dragging {
         background-color: rgba(240,240,240,0.15);
-        
+      }
+      .hidden {
+        display: none;
       }
     </style>
   </head>
@@ -70,8 +72,8 @@
           </div>
       </div>
       
-      <div class="flex-container">
-        <canvas id="resized" class="flex-box"></canvas>
+      <div id="fractal-container" class="flex-container">
+        <canvas id="resized" class="flex-box hidden"></canvas>
         <div id="fractal"class="flex-box"></div>
       </div>
     </div>

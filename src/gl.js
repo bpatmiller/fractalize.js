@@ -153,7 +153,7 @@ function fragmentShader() {
     }
 
     void main() {
-        vec2 z = (vec2(-vUv.y, vUv.x) - origin) / (scale + 0.1 * sin(0.025 * time));
+        vec2 z = (vec2(vUv.x, -vUv.y) - origin) / (scale + 0.1 * sin(0.025 * time));
         float len = 0.0;
         int iterations = 0;
         for (;iterations < maxIterations; iterations++) {
@@ -291,6 +291,9 @@ export const setupGL = (lejaStack, A_nStack, centers, setSizes, fpsGraph) => {
 
   if (renderer == null) {
     setupRenderer();
+  } else {
+    const [renderWidth, renderHeight] = getRenderDimensions();
+    renderer.setSize(renderWidth, renderHeight);
   }
 
   let maxSetSize = 0;

@@ -4,7 +4,7 @@ import * as EssentialsPlugin from "../_snowpack/pkg/@tweakpane/plugin-essentials
 
 export const PARAMS = {
   outputSize: 260,
-  minClusterSize: 0.03,
+  minClusterSize: 0.01,
   numColors: 4,
   numValidSubsets: "",
   edgePoints: "",
@@ -25,7 +25,11 @@ export const makePane = () => {
   PARAMS.outputSize = Math.floor(window.innerWidth / 2) - 64;
 
   pane.addInput(PARAMS, "outputSize", { min: 256, max: 1024, step: 1 });
-  pane.addInput(PARAMS, "minClusterSize", { min: 0.01, max: 0.4 });
+  pane.addInput(PARAMS, "minClusterSize", {
+    min: 0.005,
+    max: 0.4,
+    step: 0.005,
+  });
   pane.addInput(PARAMS, "numColors", { min: 2, max: 16, step: 1 });
   pane.addInput(PARAMS, "numLejaPoints", { min: 4, max: 32, step: 1 });
   pane.addSeparator();

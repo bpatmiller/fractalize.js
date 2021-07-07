@@ -5,8 +5,10 @@ const [pane, fpsGraph] = makePane();
 
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
-const imgParamUrl = urlParams.get("img");
-
+let imgParamUrl = urlParams.get("img");
+if (imgParamUrl == null) {
+  imgParamUrl = "https://i.imgur.com/uy0DBkZ.png";
+}
 const init = async (file) => {
   let ipu = null;
   if (file == null) {

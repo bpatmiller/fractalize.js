@@ -43,12 +43,25 @@ export const handleImage = async (file) => {
 
   // resized image tensor
   let imgT = new gm.Tensor("uint8", [dim.width, dim.height, 4]);
-  gm.canvasToTensor(canvas, imgT);
+
+  // i think canvasToTensor is only giving us a square sooo
+  // gm.canvasToTensor(canvas, imgT);
+  // gm.tensor
+  const imgTData = ctx.getImageData(0, 0, dim.width, dim.height);
+  for (let x = 0; x < dim.width; x++) {
+    for (let y = 0; y < dim.height; y++) {
+      let loc = (x + y * dim.width) * 4;
+      for (let w = 0; w < 4; w++) {
+        imgT.set(x, y, w, imgTData.data[loc + w]);
+      }
+    }
+  }
+  console.log(imgTData);
+  console.log(imgT);
 
   // segment and draw over
   let pipeline = imgT;
   pipeline = gm.colorSegmentation(pipeline, PARAMS.numColors);
-
   const out = gm.tensorFrom(pipeline);
   const sess = new gm.Session();
   sess.init(pipeline);
@@ -146,21 +159,21 @@ export const handleImage = async (file) => {
   }
 
   ctx.fillStyle = `rgba(255,255,255,0.85)`;
-  ctx.fillRect(0, 0, dim.width, dim.height);
+  // ctx.fillRect(0, 0, dim.width, dim.height);
 
   // draw over group colors, then white over, then draw outlines
-  for (let x = 0; x < dim.width; x++) {
-    for (let y = 0; y < dim.height; y++) {
-      if (groups.get(x, y) != 255) {
-        let gn = groups.get(x, y);
-        let r = Math.floor(Math.sin(gn) * 80) + 100;
-        let b = Math.floor(Math.cos(gn + 0.5) * 80) + 100;
-        let g = 240 - b;
-        ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
-        ctx.fillRect(y, x, 1, 1);
-      }
-    }
-  }
+  // for (let x = 0; x < dim.width; x++) {
+  //   for (let y = 0; y < dim.height; y++) {
+  //     if (groups.get(x, y) != 255) {
+  //       let gn = groups.get(x, y);
+  //       let r = Math.floor(Math.sin(gn) * 80) + 100;
+  //       let b = Math.floor(Math.cos(gn + 0.5) * 80) + 100;
+  //       let g = 240 - b;
+  //       ctx.fillStyle = `rgba(${r},${g},${b},0.5)`;
+  //       ctx.fillRect(y, x, 1, 1);
+  //     }
+  //   }
+  // }
 
   for (let x = 0; x < dim.width; x++) {
     for (let y = 0; y < dim.height; y++) {
@@ -170,7 +183,7 @@ export const handleImage = async (file) => {
         let b = Math.floor(Math.cos(gn + 0.5) * 80) + 100;
         let g = 240 - b;
         ctx.fillStyle = `rgb(${r},${g},${b})`;
-        ctx.fillRect(y, x, 1, 1);
+        ctx.fillRect(x, y, 1, 1);
       }
     }
   }

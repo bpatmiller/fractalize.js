@@ -1,7 +1,7 @@
 import { handleImage } from "./image.js";
 import { makePane } from "./config.js";
 import { setupGL } from "./gl.js";
-const pane = makePane();
+const [pane, fpsGraph] = makePane();
 
 var dropZone = document.getElementById("drop");
 
@@ -28,7 +28,7 @@ dropZone.addEventListener("drop", async function (e) {
         const [lejaStack, A_nStack, centers, setSizes] = await handleImage(
           file
         );
-        setupGL(lejaStack, A_nStack, centers, setSizes);
+        setupGL(lejaStack, A_nStack, centers, setSizes, fpsGraph);
       }
     }
   }

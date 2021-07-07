@@ -283,7 +283,7 @@ export const clearPanels = () => {
   panels.clear();
 };
 
-export const setupGL = (lejaStack, A_nStack, centers, setSizes) => {
+export const setupGL = (lejaStack, A_nStack, centers, setSizes, fpsGraph) => {
   if (panels.length > 0) {
     updateStackUniforms(lejaStack, A_nStack);
     return;
@@ -374,6 +374,7 @@ export const setupGL = (lejaStack, A_nStack, centers, setSizes) => {
   }
 
   function animate() {
+    fpsGraph.begin();
     requestAnimationFrame(animate);
     // for (let key in panels) {
     //   renderer.setRenderTarget(targets[key]);
@@ -386,6 +387,7 @@ export const setupGL = (lejaStack, A_nStack, centers, setSizes) => {
     }
     controls.update();
     renderer.render(scene, camera);
+    fpsGraph.end();
   }
   animate();
 };

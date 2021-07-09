@@ -3,22 +3,11 @@
 
 /** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
-  exclude: ["**/node_modules/**/*", "**/LICENSE"],
+  exclude: ["**/node_modules/**/*", "**/LICENSE", "**/deploy.sh"],
   mount: {
     /* ... */
   },
-  plugins: [
-    [
-      "@snowpack/plugin-webpack",
-      {
-        resolve: {
-          fallback: {
-            util: require.resolve("util/"),
-          },
-        },
-      },
-    ],
-  ],
+  plugins: [["@snowpack/plugin-webpack"]],
   packageOptions: {
     /* ... */
   },

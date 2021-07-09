@@ -24,12 +24,6 @@ const configuration = {
   imgData: null,
 };
 
-const loadModels = async () => {
-  for (let key in configuration.models) {
-    configuration.models[key] = await loadModel(key);
-  }
-};
-
 export const segment = async () => {
   const imgData = configuration.imgData;
 
@@ -51,6 +45,12 @@ export const segment = async () => {
 };
 
 const init = async (imgUrl) => {
+  for (let key in configuration.models) {
+    if (configuration.models[key] == null) {
+      configuration.models[key] = await loadModel(key);
+    }
+  }
+
   let { imgData } = await loadImage(imgUrl);
   configuration.imgData = imgData;
   segment();
@@ -97,5 +97,4 @@ dropZone.addEventListener("drop", async function (e) {
   }
 });
 
-loadModels();
 init(imgParamUrl);

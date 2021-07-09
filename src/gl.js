@@ -1,18 +1,12 @@
 import { Complex } from "complex.js";
 import * as THREE from "three";
 import { PARAMS } from "./config";
-// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 // panels is a jank global object of shaders on panels
 // similarly, targets is a bunch of render textures which will later be composed
 let renderer, camera;
 let panels = {};
-let targets = {};
-let scenes = {};
-let displayScene;
-let displayPanel;
 let scene;
-let controls;
 
 function vertexShader() {
   return `
@@ -344,14 +338,14 @@ const updateStackUniforms = (lejaStack, A_nStack) => {
 };
 
 const getRenderDimensions = () => {
-  const sourceContainer = document.getElementById("resized");
+  const sourceContainer = document.getElementById("source");
   let renderWidth = Math.floor(sourceContainer.width);
   let renderHeight = Math.floor(sourceContainer.height);
-  let xR = renderWidth / (window.innerWidth * 0.85);
-  let yR = renderHeight / (window.innerHeight * 0.85);
-  let expandRatio = Math.max(xR, yR);
-  renderWidth /= expandRatio;
-  renderHeight /= expandRatio;
+  // let xR = renderWidth / (window.innerWidth * 0.85);
+  // let yR = renderHeight / (window.innerHeight * 0.85);
+  // let expandRatio = Math.max(xR, yR);
+  // renderWidth /= expandRatio;
+  // renderHeight /= expandRatio;
   return [renderWidth, renderHeight];
 };
 
@@ -370,9 +364,9 @@ const setupRenderer = () => {
     alpha: true,
     depth: false,
   });
-  renderer.setClearColor(0x1e1e1e, 1);
+  // renderer.setClearColor(0x1e1e1e, 1);
 
-  const rendererContainer = document.getElementById("fractal");
+  const rendererContainer = document.getElementById("fractal-container");
   renderer.setSize(renderWidth, renderHeight);
   rendererContainer.appendChild(renderer.domElement);
 
@@ -387,14 +381,7 @@ export const clearPanels = () => {
   panels.clear();
 };
 
-export const setupGL = (
-  lejaStack,
-  A_nStack,
-  centers,
-  colors,
-  setSizes,
-  fpsGraph
-) => {
+export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
   if (panels.length > 0) {
     updateStackUniforms(lejaStack, A_nStack);
     return;
@@ -513,7 +500,6 @@ export const setupGL = (
     scene.add(panel);
     panels[key] = panel;
     updateUniforms(key, A_n, lejaPoints.length, lejaPoints);
-
     // scenes[key] = scene;
     // const renderTarget = new THREE.WebGLRenderTarget(renderWidth, renderHeight);
     // targets[key] = renderTarget;
@@ -521,7 +507,6 @@ export const setupGL = (
   }
 
   function animate() {
-    fpsGraph.begin();
     requestAnimationFrame(animate);
     // for (let key in panels) {
     //   renderer.setRenderTarget(targets[key]);
@@ -532,9 +517,7 @@ export const setupGL = (
     for (let key in panels) {
       panels[key].material.uniforms.time.value += 0.01;
     }
-    // controls.update();
     renderer.render(scene, camera);
-    fpsGraph.end();
   }
   animate();
 };

@@ -1,5 +1,8 @@
 {
   "dependencies": {
+    "@tensorflow-models/deeplab": "^0.2.1",
+    "@tensorflow/tfjs-backend-webgl": "^3.7.0",
+    "@tensorflow/tfjs-core": "^3.7.0",
     "@tweakpane/plugin-essentials": "^0.1.0",
     "complex.js": "^2.0.15",
     "gammacv": "^0.5.2",

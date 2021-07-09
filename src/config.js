@@ -1,8 +1,10 @@
 import { Pane } from "tweakpane";
 import { updateControlUniforms } from "./gl";
 import * as EssentialsPlugin from "@tweakpane/plugin-essentials";
+import { segment } from "./index";
 
 export const PARAMS = {
+  model: "",
   outputSize: 260,
   minClusterSize: 0.02,
   numColors: 4,
@@ -23,16 +25,28 @@ export const makePane = () => {
   pane.registerPlugin(EssentialsPlugin);
 
   PARAMS.outputSize = Math.floor(
-    0.85 * Math.min(window.innerHeight, window.innerWidth)
+    513 //Math.min(513, 0.85 * Math.min(window.innerHeight, window.innerWidth))
   );
 
-  pane.addInput(PARAMS, "outputSize", { min: 256, max: 1024, step: 1 });
-  pane.addInput(PARAMS, "minClusterSize", {
-    min: 0.005,
-    max: 0.4,
-    step: 0.005,
-  });
-  pane.addInput(PARAMS, "numColors", { min: 2, max: 16, step: 1 });
+  pane
+    .addInput(PARAMS, "model", {
+      options: {
+        ade20k: "ade20k",
+        pascal: "pascal",
+        cityscapes: "cityscapes",
+      },
+    })
+    .on("change", (ev) => {
+      segment();
+    });
+
+  // pane.addInput(PARAMS, "outputSize", { min: 256, max: 1024, step: 1 });
+  // pane.addInput(PARAMS, "minClusterSize", {
+  //   min: 0.005,
+  //   max: 0.4,
+  //   step: 0.005,
+  // });
+  // pane.addInput(PARAMS, "numColors", { min: 2, max: 16, step: 1 });
   pane.addInput(PARAMS, "numLejaPoints", { min: 4, max: 64, step: 1 });
   pane.addSeparator();
 

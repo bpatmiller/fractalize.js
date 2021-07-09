@@ -1,55 +1,73 @@
-import { handleImage } from "./image.js";
+import {
+  connectedSubsets,
+  loadImage,
+  loadModel,
+  segmentImage,
+} from "./image.js";
 import { makePane, PARAMS } from "./config.js";
+import * as tf from "../_snowpack/pkg/@tensorflow/tfjs-core.js";
+import "../_snowpack/pkg/@tensorflow/tfjs-backend-webgl.js";
+import { handleUrl } from "./url.js";
+import { getLejaPoints, getComplexPoints, getA_nStack } from "./fractalize.js";
 import { setupGL } from "./gl.js";
-const [pane, fpsGraph] = makePane();
 
-const queryString = window.location.search;
-const urlParams = new URLSearchParams(queryString);
-let imgParamUrl = urlParams.get("img");
-if (imgParamUrl == null) {
-  imgParamUrl = "https://i.imgur.com/uy0DBkZ.png";
-}
-const init = async (file) => {
-  let ipu = null;
-  if (file == null) {
-    ipu = imgParamUrl;
-  }
+tf.setBackend("webgl");
+const imgParamUrl = handleUrl();
+const [pane] = makePane();
 
-  const [lejaStack, A_nStack, centers, colors, setSizes] = await handleImage(
-    file,
-    ipu
-  );
-  setupGL(lejaStack, A_nStack, centers, colors, setSizes, fpsGraph);
+const configuration = {
+  models: {
+    pascal: null,
+    ade20k: null,
+    cityscapes: null,
+  },
+  imgData: null,
 };
 
-const nC = urlParams.get("nc");
-const nL = urlParams.get("nl");
-const mI = urlParams.get("mi");
-if (nC != null) {
-  PARAMS.numColors = parseInt(nC);
+for (let key in configuration.models) {
+  configuration.models[key] = await loadModel(key);
 }
-if (nL != null) {
-  PARAMS.numLejaPoints = parseInt(nL);
-}
-if (mI != null) {
-  PARAMS.maxIterations = parseInt(mI);
-}
-if (imgParamUrl != null) {
-  init(null, imgParamUrl);
-}
+
+export const segment = async () => {
+  const imgData = configuration.imgData;
+
+  const model = configuration.models[PARAMS.model];
+  const { legend, segmentationMap } = await segmentImage(model, imgData);
+  const [sets, colors, setSizes] = await connectedSubsets(
+    imgData,
+    segmentationMap
+  );
+
+  const [complexPoints, centers] = getComplexPoints(
+    sets,
+    imgData.width,
+    imgData.height
+  );
+  const lejaStack = getLejaPoints(complexPoints);
+  const A_nStack = getA_nStack(lejaStack);
+  setupGL(lejaStack, A_nStack, centers, colors, setSizes);
+};
+
+const init = async (imgUrl) => {
+  let { imgData } = await loadImage(imgUrl);
+  configuration.imgData = imgData;
+  segment();
+};
+
+// spacebar to fetch new random image
+// q to clear context
+document.addEventListener("keypress", (e) => {
+  console.log(e);
+  if (e.key == " ") {
+    // init();
+  } else if (e.key == "q") {
+    // TODO
+  }
+});
 
 const dropZone = document.getElementById("drop");
 
 const clickContainer = document.getElementById("fractal-container");
-
-clickContainer.addEventListener("click", (e) => {
-  const fractalView = document.getElementById("fractal");
-  const imageView = document.getElementById("resized");
-  fractalView.classList.toggle("hidden");
-  imageView.classList.toggle("hidden");
-  console.log("e");
-  e.preventDefault();
-});
 
 dropZone.addEventListener("dragover", function (e) {
   this.classList.add("dragging");
@@ -71,8 +89,10 @@ dropZone.addEventListener("drop", async function (e) {
         e.dataTransfer.items[i].type.match("^image/")
       ) {
         var file = e.dataTransfer.items[i].getAsFile();
-        init(file);
+        init(URL.createObjectURL(file));
       }
     }
   }
 });
+
+init(imgParamUrl);

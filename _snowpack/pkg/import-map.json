@@ -1,8 +1,10 @@
 {
   "imports": {
+    "@tensorflow-models/deeplab": "./@tensorflow-models/deeplab.js",
+    "@tensorflow/tfjs-backend-webgl": "./@tensorflow/tfjs-backend-webgl.js",
+    "@tensorflow/tfjs-core": "./@tensorflow/tfjs-core.js",
     "@tweakpane/plugin-essentials": "./@tweakpane/plugin-essentials.js",
     "complex.js": "./complexjs.js",
-    "gammacv": "./gammacv.js",
     "three": "./three.js",
     "tweakpane": "./tweakpane.js"
   }

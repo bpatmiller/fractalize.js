@@ -3,39 +3,28 @@ import { PARAMS } from "./config.js";
 
 // domain is AT MOST [-1,1] (without scale lelel)
 
-export const getComplexPoints = (groupEdges) => {
-  // a tensor with either 255 for invalid points,
-  // or some number >= 1 and < 255 for valid points/groups
+export const getComplexPoints = (sets, w, h) => {
+  // a dict of [[x,y]] tuples
   let centers = {};
-
-  const [w, h, _] = groupEdges.shape;
-  const majorAxis = Math.max(w, h);
-  const pixelsToUnitFactor = 2.0 / majorAxis;
   const origin = new Complex(PARAMS.origin.x, PARAMS.origin.y);
 
   function pixelsToComplex(i, j) {
-    let real = (i * pixelsToUnitFactor - 1.0 + origin.re) * PARAMS.scale;
-    let imag = (j * pixelsToUnitFactor - 1.0 + origin.im) * PARAMS.scale;
+    let real = (i * (2.0 / w) - 1.0 + origin.re) * PARAMS.scale;
+    let imag = (j * (2.0 / h) - 1.0 + origin.im) * PARAMS.scale;
     return new Complex(real, imag);
   }
 
   let edgePointCount = 0;
   let complexPoints = {};
-  const borderSize = 0;
-  for (let x = borderSize; x < w - borderSize; x++) {
-    for (let y = borderSize; y < h - borderSize; y++) {
-      let gn = groupEdges.get(x, y);
-      if (gn != 255) {
-        edgePointCount++;
-        if (complexPoints[gn] != null) {
-          complexPoints[gn].push(pixelsToComplex(x, y));
-        } else {
-          complexPoints[gn] = [pixelsToComplex(x, y)];
-        }
-      }
+  for (let key in sets) {
+    let set = sets[key];
+    complexPoints[key] = [];
+    for (let i = 0; i < set.length; i++) {
+      complexPoints[key].push(pixelsToComplex(set[i][0], set[i][1]));
+      edgePointCount++;
     }
   }
-  // "edge pixel percent"
+
   let epp = Math.floor((100 * edgePointCount) / (w * h));
   PARAMS.complexPoints = `${edgePointCount} / ${w * h} (${epp}%)`;
 
@@ -48,13 +37,6 @@ export const getComplexPoints = (groupEdges) => {
     }
   }
 
-  // for (let key in complexPoints) {
-  //   let sum = new Complex(0);
-  //   for (let i = 0; i < complexPoints[key].length; i++) {
-  //     sum = sum.add(complexPoints[key][i]);
-  //   }
-  //   console.log(key, sum);
-  // }
   return [complexPoints, centers];
 };
 

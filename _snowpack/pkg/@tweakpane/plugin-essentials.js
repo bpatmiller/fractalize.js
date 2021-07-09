@@ -1,4 +1,4 @@
-import { g as getDefaultExportFromCjs, c as createCommonjsModule, a as commonjsGlobal } from '../common/_commonjsHelpers-8c19dec8.js';
+import { b as getDefaultExportFromCjs, c as createCommonjsModule, a as commonjsGlobal } from '../common/_commonjsHelpers-0597c316.js';
 
 var tweakpanePluginEssentials = createCommonjsModule(function (module, exports) {
 (function (global, factory) {

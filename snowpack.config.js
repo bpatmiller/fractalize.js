@@ -7,7 +7,18 @@ module.exports = {
   mount: {
     /* ... */
   },
-  plugins: [["@snowpack/plugin-webpack"]],
+  plugins: [
+    [
+      "@snowpack/plugin-webpack",
+      {
+        resolve: {
+          fallback: {
+            util: require.resolve("util/"),
+          },
+        },
+      },
+    ],
+  ],
   packageOptions: {
     /* ... */
   },

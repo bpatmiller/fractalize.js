@@ -140,19 +140,16 @@ document.addEventListener(
   "mousewheel",
   (e) => {
     if (!ticking) {
-      if (e.ctrlKey) {
-        ticking = true;
-        requestAnimationFrame(() => {
-          let zoomFac = 1.0 - e.deltaY * 0.1;
-          let newScale = zoomFac * PARAMS.scale;
-          PARAMS.scale = Math.max(0.5, Math.min(1000.0, newScale));
-          updateControlUniforms();
-          if (!PARAMS.playing) animate();
-          ticking = false;
-        });
-      }
+      ticking = true;
+      requestAnimationFrame(() => {
+        let zoomFac = 1.0 + e.deltaY * 0.1;
+        let newScale = zoomFac * PARAMS.scale;
+        PARAMS.scale = Math.max(0.5, Math.min(1000.0, newScale));
+        updateControlUniforms();
+        if (!PARAMS.playing) animate();
+        ticking = false;
+      });
     }
-
     e.preventDefault();
   },
   { passive: false }

@@ -422,7 +422,7 @@ const setupControls = () => {
       PARAMS.focus.x += 0.01 * deltaX;
       PARAMS.focus.y += 0.01 * deltaY;
       updateControlUniforms();
-      console.log(deltaX, deltaY);
+      if (!PARAMS.playing) animate();
     }
   });
 };
@@ -554,6 +554,7 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
 };
 
 export const animate = () => {
+  if (renderer == null) return;
   if (PARAMS.playing && time >= 0) {
     requestAnimationFrame(animate);
     for (let key in panels) {

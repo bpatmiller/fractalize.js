@@ -372,10 +372,9 @@ const setupRenderer = () => {
   });
   // renderer.setClearColor(0x1e1e1e, 1);
 
-  const [renderWidth, renderHeight] = getRenderDimensions();
   const rendererContainer = document.getElementById("fractal-container");
   renderer.domElement.setAttribute("id", "fractal");
-  renderer.setSize(renderWidth, renderHeight);
+  resizeRenderer();
   rendererContainer.appendChild(renderer.domElement);
   window.onresize = resizeRenderer;
 
@@ -436,6 +435,8 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
   if (renderer == null) {
     setupRenderer();
     setupControls();
+  } else {
+    resizeRenderer();
   }
 
   let maxSetSize = 0;

@@ -6,7 +6,6 @@
     "@tweakpane/plugin-essentials": "^0.1.0",
     "complex.js": "^2.0.15",
     "extract-colors": "^1.1.18",
-    "gammacv": "^0.5.2",
     "three": "^0.130.1",
     "tweakpane": "^3.0.2",
     "util": "^0.12.4"

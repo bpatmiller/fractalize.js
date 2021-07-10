@@ -136,11 +136,6 @@ dropZone.addEventListener("drop", async function (e) {
   }
 });
 
-// document.addEventListener("onpointerdown", (e) => {
-//   scaling = true;
-//   console.log(e);
-// });
-
 document.addEventListener(
   "mousewheel",
   (e) => {
@@ -150,7 +145,7 @@ document.addEventListener(
         requestAnimationFrame(() => {
           let zoomFac = 1.0 - e.deltaY * 0.1;
           let newScale = zoomFac * PARAMS.scale;
-          PARAMS.scale = Math.max(0.1, Math.min(250.0, newScale));
+          PARAMS.scale = Math.max(0.5, Math.min(1000.0, newScale));
           updateControlUniforms();
           if (!PARAMS.playing) animate();
           ticking = false;

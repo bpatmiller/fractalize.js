@@ -6,11 +6,11 @@ import { PARAMS } from "./config";
 export const getComplexPoints = (sets, w, h) => {
   // a dict of [[x,y]] tuples
   let centers = {};
-  const origin = new Complex(PARAMS.origin.x, PARAMS.origin.y);
+  // const origin = new Complex(PARAMS.origin.x, PARAMS.origin.y);
 
   function pixelsToComplex(i, j) {
-    let real = (i * (2.0 / w) - 1.0 + origin.re) * PARAMS.scale;
-    let imag = (j * (2.0 / h) - 1.0 + origin.im) * PARAMS.scale;
+    let real = (i * (2.0 / w) - 1.0) * PARAMS.scale;
+    let imag = (j * (2.0 / h) - 1.0) * PARAMS.scale;
     return new Complex(real, imag);
   }
 
@@ -85,6 +85,7 @@ export const getLejaPoints = (complexPoints) => {
   let lejaStack = {};
   for (var key in complexPoints) {
     const group = complexPoints[key];
+    let checkedPoints = [];
 
     const n = Math.min(PARAMS.numLejaPoints, Math.floor(group.length / 2));
     let lejaPoints = [];
@@ -93,14 +94,17 @@ export const getLejaPoints = (complexPoints) => {
       var smax = 0;
       var cur = 0;
       for (let s = 0; s < group.length; s++) {
-        cur = PI_Z(lejaPoints, group, s);
-        if (cur > max) {
-          max = cur;
-          smax = s;
+        if (!checkedPoints.includes(s)) {
+          cur = PI_Z(lejaPoints, group, s);
+          if (cur > max) {
+            max = cur;
+            smax = s;
+          }
         }
       }
       lejaPoints.push(group[smax]);
-      group.splice(smax, 1);
+      checkedPoints.push(smax);
+      // group.splice(smax, 1);
     }
     lejaStack[key] = lejaPoints;
   }

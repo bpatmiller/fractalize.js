@@ -1,7 +1,7 @@
 import { Pane } from "tweakpane";
 import { animate, updateControlUniforms } from "./gl";
 import * as EssentialsPlugin from "@tweakpane/plugin-essentials";
-import { segment } from "./index";
+import { segment, computeFractal } from "./index";
 
 export const PARAMS = {
   playing: true,
@@ -12,7 +12,7 @@ export const PARAMS = {
   numValidSubsets: "",
   edgePoints: "",
   scale: 1.0,
-  origin: { x: 0.0, y: 0.0 },
+  focus: { x: 0.0, y: 0.0 },
   numLejaPoints: 32,
   maxIterations: 8,
 };
@@ -50,24 +50,31 @@ export const makePane = () => {
   //   step: 0.005,
   // });
   // pane.addInput(PARAMS, "numColors", { min: 2, max: 16, step: 1 });
-  pane.addInput(PARAMS, "numLejaPoints", { min: 4, max: 64, step: 1 });
+  pane
+    .addInput(PARAMS, "numLejaPoints", { min: 4, max: 64, step: 1 })
+    .on("change", () => {
+      computeFractal();
+    });
   pane.addSeparator();
 
   pane
     .addInput(PARAMS, "maxIterations", { min: 4, max: 64, step: 1 })
     .on("change", (ev) => {
       updateControlUniforms();
+      animate();
     });
   pane
     .addInput(PARAMS, "scale", { min: 0.1, max: 10.0, step: 0.1 })
     .on("change", (ev) => {
       updateControlUniforms();
+      animate();
     });
-  // pane
-  //   .addInput(PARAMS, "origin", { picker: "inline", expanded: false })
-  //   .on("change", (ev) => {
-  //     updateControlUniforms();
-  //   });
+  pane
+    .addInput(PARAMS, "focus", { picker: "inline", expanded: false })
+    .on("change", (ev) => {
+      updateControlUniforms();
+      animate();
+    });
   pane.addSeparator();
 
   pane.addMonitor(PARAMS, "numValidSubsets");

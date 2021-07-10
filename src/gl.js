@@ -192,7 +192,7 @@ function fragmentShader() {
     }
 
     void main() {
-        vec2 z = ((vec2(vUv.x, -vUv.y) - focus) / (scale + 0.05 * sin(0.1 * time))) - origin;
+        vec2 z = (vec2(vUv.x, -vUv.y) / (scale + 0.05 * sin(0.1 * time))) - origin - focus;
         float len = 0.0;
         int iterations = 0;
         for (;iterations < maxIterations; iterations++) {
@@ -419,8 +419,8 @@ const setupControls = () => {
       let deltaY = mouseY - lastMouseY;
       lastMouseX = mouseX;
       lastMouseY = mouseY;
-      PARAMS.focus.x += 0.01 * deltaX;
-      PARAMS.focus.y += 0.01 * deltaY;
+      PARAMS.focus.x += (0.01 * deltaX) / PARAMS.scale;
+      PARAMS.focus.y += (0.01 * deltaY) / PARAMS.scale;
       updateControlUniforms();
       if (!PARAMS.playing) animate();
     }

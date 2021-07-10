@@ -1,12 +1,9 @@
 import { Complex } from "../_snowpack/pkg/complexjs.js";
 import { PARAMS } from "./config.js";
 
-// domain is AT MOST [-1,1] (without scale lelel)
-
 export const getComplexPoints = (sets, w, h) => {
   // a dict of [[x,y]] tuples
   let centers = {};
-  // const origin = new Complex(PARAMS.origin.x, PARAMS.origin.y);
 
   function pixelsToComplex(i, j) {
     let real = (i * (2.0 / w) - 1.0) * PARAMS.scale;
@@ -104,7 +101,6 @@ export const getLejaPoints = (complexPoints) => {
       }
       lejaPoints.push(group[smax]);
       checkedPoints.push(smax);
-      // group.splice(smax, 1);
     }
     lejaStack[key] = lejaPoints;
   }

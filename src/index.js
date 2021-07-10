@@ -16,11 +16,12 @@ import {
   updateControlUniforms,
 } from "./gl.js";
 import extractColors from "../_snowpack/pkg/extract-colors.js";
-let ticking = false;
 
-tf.setBackend("webgl");
+let ticking = false;
 const imgParamUrl = handleUrl();
 const [pane] = makePane();
+
+tf.setBackend("webgl");
 
 const configuration = {
   models: {
@@ -64,7 +65,7 @@ export const segment = async () => {
 
   const model = configuration.models[PARAMS.model];
   const { legend, segmentationMap } = await segmentImage(model, imgData);
-  const [sets, _, setSizes] = await connectedSubsets(imgData, segmentationMap);
+  const [sets, setSizes] = await connectedSubsets(imgData, segmentationMap);
   configuration.setSizes = setSizes;
   configuration.colors = getColorScheme(sets);
   const [complexPoints, centers] = getComplexPoints(

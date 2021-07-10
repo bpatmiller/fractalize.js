@@ -9,8 +9,9 @@ import * as tf from "../_snowpack/pkg/@tensorflow/tfjs-core.js";
 import "../_snowpack/pkg/@tensorflow/tfjs-backend-webgl.js";
 import { handleUrl } from "./url.js";
 import { getLejaPoints, getComplexPoints, getA_nStack } from "./fractalize.js";
-import { setupGL, toggleSourceDisplay } from "./gl.js";
+import { animate, setupGL, toggleSourceDisplay } from "./gl.js";
 import extractColors from "../_snowpack/pkg/extract-colors.js";
+import { complex } from "../_snowpack/pkg/@tensorflow/tfjs-core.js";
 
 tf.setBackend("webgl");
 const imgParamUrl = handleUrl();
@@ -24,6 +25,8 @@ const configuration = {
   },
   imgData: null,
   colorscheme: null,
+  complexPoints: null,
+  centers: null,
 };
 
 const getColorScheme = (sets) => {
@@ -39,21 +42,35 @@ const getColorScheme = (sets) => {
   return colors;
 };
 
+export const computeFractal = () => {
+  const lejaStack = getLejaPoints(configuration.complexPoints);
+  const A_nStack = getA_nStack(lejaStack);
+  setupGL(
+    lejaStack,
+    A_nStack,
+    configuration.centers,
+    configuration.colors,
+    configuration.setSizes
+  );
+};
+
 export const segment = async () => {
   const imgData = configuration.imgData;
 
   const model = configuration.models[PARAMS.model];
   const { legend, segmentationMap } = await segmentImage(model, imgData);
   const [sets, _, setSizes] = await connectedSubsets(imgData, segmentationMap);
-  const colors = getColorScheme(sets);
+  configuration.setSizes = setSizes;
+  configuration.colors = getColorScheme(sets);
   const [complexPoints, centers] = getComplexPoints(
     sets,
     imgData.width,
     imgData.height
   );
-  const lejaStack = getLejaPoints(complexPoints);
-  const A_nStack = getA_nStack(lejaStack);
-  setupGL(lejaStack, A_nStack, centers, colors, setSizes);
+
+  configuration.complexPoints = complexPoints;
+  configuration.centers = centers;
+  computeFractal();
 };
 
 const init = async (imgUrl) => {
@@ -79,17 +96,15 @@ const init = async (imgUrl) => {
 document.addEventListener("keypress", (e) => {
   console.log(e);
   if (e.key == " ") {
-    // init();
-  } else if (e.key == "q") {
-    // TODO
+    PARAMS.playing = !PARAMS.playing;
+    if (PARAMS.playing) animate();
+    e.preventDefault();
+  } else if (e.key == "s") {
+    toggleSourceDisplay();
   }
 });
 
 const dropZone = document.getElementById("drop");
-const clickZone = document.getElementById("fractal-container");
-clickZone.addEventListener("click", () => {
-  toggleSourceDisplay();
-});
 
 dropZone.addEventListener("dragover", function (e) {
   this.classList.add("dragging");

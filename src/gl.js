@@ -9,6 +9,11 @@ let panels = {};
 let scene;
 let time = 0;
 let timeDelta = -0.02;
+let dragging = false;
+let mouseX = 0,
+  mouseY = 0,
+  lastMouseX = 0,
+  lastMouseY = 0;
 
 function vertexShader() {
   return `
@@ -30,6 +35,7 @@ function fragmentShader() {
     uniform int maxIterations;
     uniform float scale;
     uniform vec2 origin;
+    uniform vec2 focus;
     uniform vec3 color;
 
     uniform vec2 l1;
@@ -98,34 +104,6 @@ function fragmentShader() {
     uniform vec2 l64;
 
     varying vec3 vUv;
-
-    // from https://stackoverflow.com/questions/4200224/random-noise-functions-for-glsl
-
-    // A single iteration of Bob Jenkins' One-At-A-Time hashing algorithm.
-    uint hash( uint x ) {
-        x += ( x << 10u );
-        x ^= ( x >>  6u );
-        x += ( x <<  3u );
-        x ^= ( x >> 11u );
-        x += ( x << 15u );
-        return x;
-    }
-
-    // Construct a float with half-open range [0:1] using low 23 bits.
-    // All zeroes yields 0.0, all ones yields the next smallest representable value below 1.0.
-    float floatConstruct( uint m ) {
-        const uint ieeeMantissa = 0x007FFFFFu; // binary32 mantissa bitmask
-        const uint ieeeOne      = 0x3F800000u; // 1.0 in IEEE binary32
-
-        m &= ieeeMantissa;                     // Keep only mantissa bits (fractional part)
-        m |= ieeeOne;                          // Add fractional part to 1.0
-
-        float  f = uintBitsToFloat( m );       // Range [1:2]
-        return f - 1.0;                        // Range [0:1]
-    }
-
-    // Pseudo-random value in half-open range [0:1].
-    float random( float x ) { return floatConstruct(hash(floatBitsToUint(x))); }
 
     vec2 lejaStep(vec2 z, vec2 p, vec2 l, int n) {
         if (n > nl) return p;
@@ -214,7 +192,7 @@ function fragmentShader() {
     }
 
     void main() {
-        vec2 z = (vec2(vUv.x, -vUv.y) - origin) / (scale + 0.05 * sin(0.1 * time));
+        vec2 z = ((vec2(vUv.x, -vUv.y) - focus) / (scale + 0.05 * sin(0.1 * time))) - origin;
         float len = 0.0;
         int iterations = 0;
         for (;iterations < maxIterations; iterations++) {
@@ -229,6 +207,7 @@ function fragmentShader() {
         float s = 0.65;
         float v = float(iterations)/float(maxIterations);
         vec3 rgb = hsv2rgb(vec3(h,s,v));
+        //float a = v-0.2;
         float a = mix(0.5+0.5*cos(1.0/float(iterations)),v - 0.2,clamp(0.7 + 0.5*sin(0.729+time*.09),0.8,1.0));
         if (a < 0.1) {
           discard;
@@ -244,8 +223,8 @@ export const updateControlUniforms = () => {
     let material = panels[key].material;
     material.uniforms.maxIterations.value = PARAMS.maxIterations;
     material.uniforms.scale.value = PARAMS.scale;
-    // material.uniforms.origin.value.x = PARAMS.origin.x;
-    // material.uniforms.origin.value.y = PARAMS.origin.y;
+    material.uniforms.focus.value.x = PARAMS.focus.x;
+    material.uniforms.focus.value.y = PARAMS.focus.y;
   }
 };
 
@@ -420,6 +399,34 @@ export const clearPanels = () => {
   panels.clear();
 };
 
+const setupControls = () => {
+  const clickZone = document.getElementById("fractal");
+  clickZone.addEventListener("mousedown", (ev) => {
+    dragging = true;
+    lastMouseX = ev.clientX;
+    lastMouseY = ev.clientY;
+  });
+
+  clickZone.addEventListener("mouseup", () => {
+    dragging = false;
+  });
+
+  clickZone.addEventListener("mousemove", (ev) => {
+    if (dragging) {
+      mouseX = ev.clientX;
+      mouseY = ev.clientY;
+      let deltaX = mouseX - lastMouseX;
+      let deltaY = mouseY - lastMouseY;
+      lastMouseX = mouseX;
+      lastMouseY = mouseY;
+      PARAMS.focus.x += 0.01 * deltaX;
+      PARAMS.focus.y += 0.01 * deltaY;
+      updateControlUniforms();
+      console.log(deltaX, deltaY);
+    }
+  });
+};
+
 export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
   if (panels.length > 0) {
     updateStackUniforms(lejaStack, A_nStack);
@@ -428,9 +435,7 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
 
   if (renderer == null) {
     setupRenderer();
-  } else {
-    const [renderWidth, renderHeight] = getRenderDimensions();
-    renderer.setSize(renderWidth, renderHeight);
+    setupControls();
   }
 
   let maxSetSize = 0;
@@ -463,6 +468,7 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
         scale: { value: 1.0 },
         color: { value: new THREE.Vector3(color[0], color[1], color[2]) },
         origin: { value: new THREE.Vector2(center.re, center.im) },
+        focus: { value: new THREE.Vector2(PARAMS.focus.x, PARAMS.focus.y) },
         l1: { value: new THREE.Vector2() },
         l2: { value: new THREE.Vector2() },
         l3: { value: new THREE.Vector2() },
@@ -548,15 +554,7 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
 };
 
 export const animate = () => {
-  if (PARAMS.playing) {
-  }
-  // for (let key in panels) {
-  //   renderer.setRenderTarget(targets[key]);
-  //   renderer.render(scenes[key], camera);
-  // }
-  // renderer.setRenderTarget(null);
-  // renderer.render(displayScene, camera);
-  if (time >= 0) {
+  if (PARAMS.playing && time >= 0) {
     requestAnimationFrame(animate);
     for (let key in panels) {
       time += timeDelta;

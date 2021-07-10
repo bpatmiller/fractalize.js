@@ -9,9 +9,14 @@ import * as tf from "@tensorflow/tfjs-core";
 import "@tensorflow/tfjs-backend-webgl";
 import { handleUrl } from "./url";
 import { getLejaPoints, getComplexPoints, getA_nStack } from "./fractalize.js";
-import { animate, setupGL, toggleSourceDisplay } from "./gl.js";
+import {
+  animate,
+  setupGL,
+  toggleSourceDisplay,
+  updateControlUniforms,
+} from "./gl.js";
 import extractColors from "extract-colors";
-import { complex } from "@tensorflow/tfjs-core";
+let ticking = false;
 
 tf.setBackend("webgl");
 const imgParamUrl = handleUrl();
@@ -94,7 +99,6 @@ const init = async (imgUrl) => {
 // spacebar to fetch new random image
 // q to clear context
 document.addEventListener("keypress", (e) => {
-  console.log(e);
   if (e.key == " ") {
     PARAMS.playing = !PARAMS.playing;
     if (PARAMS.playing) animate();
@@ -131,5 +135,31 @@ dropZone.addEventListener("drop", async function (e) {
     }
   }
 });
+
+// document.addEventListener("onpointerdown", (e) => {
+//   scaling = true;
+//   console.log(e);
+// });
+
+document.addEventListener(
+  "mousewheel",
+  (e) => {
+    if (!ticking) {
+      if (e.ctrlKey) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          let newScale = PARAMS.scale - e.deltaY * 0.025;
+          PARAMS.scale = Math.max(0.1, Math.min(100.0, newScale));
+          updateControlUniforms();
+          if (!PARAMS.playing) animate();
+          ticking = false;
+        });
+      }
+    }
+
+    e.preventDefault();
+  },
+  { passive: false }
+);
 
 init(imgParamUrl);

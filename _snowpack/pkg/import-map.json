@@ -5,6 +5,7 @@
     "@tensorflow/tfjs-core": "./@tensorflow/tfjs-core.js",
     "@tweakpane/plugin-essentials": "./@tweakpane/plugin-essentials.js",
     "complex.js": "./complexjs.js",
+    "extract-colors": "./extract-colors.js",
     "three": "./three.js",
     "tweakpane": "./tweakpane.js"
   }

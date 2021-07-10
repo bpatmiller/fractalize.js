@@ -9,7 +9,8 @@ import * as tf from "../_snowpack/pkg/@tensorflow/tfjs-core.js";
 import "../_snowpack/pkg/@tensorflow/tfjs-backend-webgl.js";
 import { handleUrl } from "./url.js";
 import { getLejaPoints, getComplexPoints, getA_nStack } from "./fractalize.js";
-import { setupGL } from "./gl.js";
+import { setupGL, toggleSourceDisplay } from "./gl.js";
+import extractColors from "../_snowpack/pkg/extract-colors.js";
 
 tf.setBackend("webgl");
 const imgParamUrl = handleUrl();
@@ -22,6 +23,20 @@ const configuration = {
     cityscapes: null,
   },
   imgData: null,
+  colorscheme: null,
+};
+
+const getColorScheme = (sets) => {
+  let colors = {};
+  let colorCt = 0;
+  let numColors = configuration.colorscheme.length;
+  for (let key in sets) {
+    let colorIndex = colorCt % numColors;
+    let color = configuration.colorscheme[colorIndex];
+    colors[key] = [color.red / 255.0, color.green / 255.0, color.blue / 255.0];
+    colorCt++;
+  }
+  return colors;
 };
 
 export const segment = async () => {
@@ -29,11 +44,8 @@ export const segment = async () => {
 
   const model = configuration.models[PARAMS.model];
   const { legend, segmentationMap } = await segmentImage(model, imgData);
-  const [sets, colors, setSizes] = await connectedSubsets(
-    imgData,
-    segmentationMap
-  );
-
+  const [sets, _, setSizes] = await connectedSubsets(imgData, segmentationMap);
+  const colors = getColorScheme(sets);
   const [complexPoints, centers] = getComplexPoints(
     sets,
     imgData.width,
@@ -52,6 +64,12 @@ const init = async (imgUrl) => {
   }
 
   let { imgData } = await loadImage(imgUrl);
+  configuration.colorscheme = await extractColors.extractColors(imgData, {
+    distance: 0.2,
+    splitPower: 14,
+    saturationImportance: 0.23,
+  });
+  // console.log(configuration.colorscheme);
   configuration.imgData = imgData;
   segment();
 };
@@ -68,8 +86,10 @@ document.addEventListener("keypress", (e) => {
 });
 
 const dropZone = document.getElementById("drop");
-
-const clickContainer = document.getElementById("fractal-container");
+const clickZone = document.getElementById("fractal-container");
+clickZone.addEventListener("click", () => {
+  toggleSourceDisplay();
+});
 
 dropZone.addEventListener("dragover", function (e) {
   this.classList.add("dragging");

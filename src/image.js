@@ -2,7 +2,7 @@ import { load } from "../_snowpack/pkg/@tensorflow-models/deeplab.js";
 import { getA_nStack, getComplexPoints, getLejaPoints } from "./fractalize.js";
 import { PARAMS } from "./config.js";
 import * as tf from "../_snowpack/pkg/@tensorflow/tfjs-core.js";
-import { stack } from "../_snowpack/pkg/@tensorflow/tfjs-core.js";
+// import {} from "@tensorflow/tfjs-core";
 // basically just
 // - handle an image upload
 // - resize it to fit with our params

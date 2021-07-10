@@ -5,6 +5,7 @@
     "@tensorflow/tfjs-core": "^3.7.0",
     "@tweakpane/plugin-essentials": "^0.1.0",
     "complex.js": "^2.0.15",
+    "extract-colors": "^1.1.18",
     "gammacv": "^0.5.2",
     "three": "^0.130.1",
     "tweakpane": "^3.0.2",
@@ -21,6 +22,7 @@
   "description": "",
   "devDependencies": {
     "@snowpack/plugin-webpack": "^3.0.0",
+    "canvas": "^2.8.0",
     "snowpack": "^3.7.1"
   }
 }

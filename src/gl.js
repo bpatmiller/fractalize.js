@@ -7,6 +7,8 @@ import { PARAMS } from "./config.js";
 let renderer, camera;
 let panels = {};
 let scene;
+let time = 0;
+let timeDelta = -0.02;
 
 function vertexShader() {
   return `
@@ -127,7 +129,7 @@ function fragmentShader() {
 
     vec2 lejaStep(vec2 z, vec2 p, vec2 l, int n) {
         if (n > nl) return p;
-        vec2 r = vec2(z.x-l.x, z.y-l.y);
+        vec2 r = vec2(z.x-l.x, z.y-l.y) * (1.0+0.07*sin(time*0.13));
         vec2 p2 = vec2(p.x * r.x - p.y * r.y, p.x * r.y + p.y * r.x);
         return p2;
     }
@@ -223,14 +225,15 @@ function fragmentShader() {
             len += length(z - tmp);
             z = tmp;
         }
-        // float h =  0.5 * sin(time * 0.01) + random(an + l1.y);//random(l2.y + l2.x);
-        // float s = 0.65;
+        float h =  sin(len * 0.5);
+        float s = 0.65;
         float v = float(iterations)/float(maxIterations);
-        float a = v - 0.2;
+        vec3 rgb = hsv2rgb(vec3(h,s,v));
+        float a = mix(0.5+0.5*cos(1.0/float(iterations)),v - 0.2,clamp(0.7 + 0.5*sin(0.729+time*.09),0.8,1.0));
         if (a < 0.1) {
           discard;
         }
-        gl_FragColor = vec4(color, a);
+        gl_FragColor = vec4(mix(rgb,color,0.5 + 0.75*sin(0.729+time*0.05)), a);
     }
 `;
 }
@@ -248,6 +251,10 @@ export const updateControlUniforms = () => {
 
 const updateUniforms = (panelIndex, an, nl, lejaPoints) => {
   let material = panels[panelIndex].material;
+
+  time = 0;
+  timeDelta = 0;
+  material.uniforms.time.value = 0;
 
   material.uniforms.an.value = an;
   material.uniforms.nl.value = nl;
@@ -338,14 +345,22 @@ const updateStackUniforms = (lejaStack, A_nStack) => {
 };
 
 const getRenderDimensions = () => {
+  const sourceCanvas = document.getElementById("source");
+  let sourceW = 0;
+  // sourceH = 0;
+  if (sourceCanvas.classList.contains("hidden")) {
+    sourceW = sourceCanvas.clientWidth;
+    // sourceH = sourceCanvas.clientHeight;
+  }
+
   const sourceContainer = document.getElementById("source");
   let renderWidth = Math.floor(sourceContainer.width);
   let renderHeight = Math.floor(sourceContainer.height);
-  // let xR = renderWidth / (window.innerWidth * 0.85);
-  // let yR = renderHeight / (window.innerHeight * 0.85);
-  // let expandRatio = Math.max(xR, yR);
-  // renderWidth /= expandRatio;
-  // renderHeight /= expandRatio;
+  let xR = renderWidth / (window.innerWidth * 0.85 - sourceW);
+  let yR = renderHeight / (window.innerHeight * 0.85);
+  let expandRatio = Math.max(xR, yR);
+  renderWidth /= expandRatio;
+  renderHeight /= expandRatio;
   return [renderWidth, renderHeight];
 };
 
@@ -357,24 +372,48 @@ const getRenderDimensions = () => {
 
 // }
 
-const setupRenderer = () => {
+export const resizeRenderer = () => {
+  if (renderer == null) {
+    return;
+  }
   const [renderWidth, renderHeight] = getRenderDimensions();
+  renderer.setSize(renderWidth, renderHeight);
+};
 
+export const toggleSourceDisplay = () => {
+  let sourceCanvas = document.getElementById("source");
+  sourceCanvas.classList.toggle("hidden");
+  resizeRenderer();
+};
+
+const setupRenderer = () => {
   renderer = new THREE.WebGLRenderer({
     alpha: true,
     depth: false,
   });
   // renderer.setClearColor(0x1e1e1e, 1);
 
+  const [renderWidth, renderHeight] = getRenderDimensions();
   const rendererContainer = document.getElementById("fractal-container");
+  renderer.domElement.setAttribute("id", "fractal");
   renderer.setSize(renderWidth, renderHeight);
   rendererContainer.appendChild(renderer.domElement);
+  window.onresize = resizeRenderer;
 
   camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 10);
-
-  // controls = new OrbitControls(camera, renderer.domElement);
-
   camera.position.z = 3;
+
+  const clickZone = document.getElementById("fractal");
+  clickZone.addEventListener("mouseover", () => {
+    timeDelta = 0.01;
+    if (time <= 0.0) {
+      time = Math.max(time, 0.0);
+      animate();
+    }
+  });
+  clickZone.addEventListener("mouseout", () => {
+    timeDelta = -0.02;
+  });
 };
 
 export const clearPanels = () => {
@@ -505,19 +544,24 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
     // targets[key] = renderTarget;
     // console.log("created render targets");
   }
-
-  function animate() {
-    requestAnimationFrame(animate);
-    // for (let key in panels) {
-    //   renderer.setRenderTarget(targets[key]);
-    //   renderer.render(scenes[key], camera);
-    // }
-    // renderer.setRenderTarget(null);
-    // renderer.render(displayScene, camera);
-    for (let key in panels) {
-      panels[key].material.uniforms.time.value += 0.01;
-    }
-    renderer.render(scene, camera);
-  }
   animate();
+};
+
+export const animate = () => {
+  if (PARAMS.playing) {
+  }
+  // for (let key in panels) {
+  //   renderer.setRenderTarget(targets[key]);
+  //   renderer.render(scenes[key], camera);
+  // }
+  // renderer.setRenderTarget(null);
+  // renderer.render(displayScene, camera);
+  if (time >= 0) {
+    requestAnimationFrame(animate);
+    for (let key in panels) {
+      time += timeDelta;
+      panels[key].material.uniforms.time.value += timeDelta;
+    }
+  }
+  renderer.render(scene, camera);
 };

@@ -20,7 +20,7 @@
         justify-content: center;
        }
       .head>#title {
-        background: radial-gradient(circle, rgba(109, 77, 91) 0%, rgba(0,0,0,0) 40%);      
+        background: radial-gradient(circle, rgba(109, 77, 91) 0%, rgba(0,0,0,0) 10%);      
         padding: 8px;
         margin-top: auto;
         margin-bottom: auto;
@@ -33,8 +33,8 @@
         display: flex;
         flex-direction: row;
         flex-wrap: wrap;
-        justify-content: space-around;
-        align-items: baseline;
+        justify-content: center;
+        align-items: center;
       }
       .flex-box {
         display: flex;
@@ -51,6 +51,9 @@
       .dragging {
         background-color: rgba(240,240,240,0.15);
       }
+      .hidden {
+        display: none;
+      }
      
     </style>
   </head>
@@ -65,9 +68,11 @@
               FRACTALIZE.JS
             </p>
             <p>
-              DRAG IMAGE ONTO PAGE
-            </p>
-          </div>
+            >DRAG IMAGE ONTO PAGE>
+            >CLICK TO SHOW/HIDE SOURCE IMAGE>
+            >HOVER OVER FRACTAL TO ANIMATE IT>
+          </p>
+        </div>
       </div>
       
       <div id="fractal-container" class="flex-container">

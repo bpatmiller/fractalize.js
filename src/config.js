@@ -1,9 +1,10 @@
 import { Pane } from "tweakpane";
-import { updateControlUniforms } from "./gl";
+import { animate, updateControlUniforms } from "./gl";
 import * as EssentialsPlugin from "@tweakpane/plugin-essentials";
 import { segment } from "./index";
 
 export const PARAMS = {
+  playing: true,
   model: "",
   outputSize: 260,
   minClusterSize: 0.02,
@@ -39,7 +40,9 @@ export const makePane = () => {
     .on("change", (ev) => {
       segment();
     });
-
+  pane.addInput(PARAMS, "playing").on("change", (ev) => {
+    animate();
+  });
   // pane.addInput(PARAMS, "outputSize", { min: 256, max: 1024, step: 1 });
   // pane.addInput(PARAMS, "minClusterSize", {
   //   min: 0.005,
@@ -60,19 +63,19 @@ export const makePane = () => {
     .on("change", (ev) => {
       updateControlUniforms();
     });
-  pane
-    .addInput(PARAMS, "origin", { picker: "inline", expanded: false })
-    .on("change", (ev) => {
-      updateControlUniforms();
-    });
+  // pane
+  //   .addInput(PARAMS, "origin", { picker: "inline", expanded: false })
+  //   .on("change", (ev) => {
+  //     updateControlUniforms();
+  //   });
   pane.addSeparator();
 
   pane.addMonitor(PARAMS, "numValidSubsets");
-  pane.addMonitor(PARAMS, "edgePoints");
-  pane.addSeparator();
-  const fpsGraph = pane.addBlade({
-    view: "fpsgraph",
-    label: "fpsgraph",
-  });
-  return [pane, fpsGraph];
+  // pane.addMonitor(PARAMS, "edgePoints");
+  // pane.addSeparator();
+  // fpsGraph = pane.addBlade({
+  //   view: "fpsgraph",
+  //   label: "fpsgraph",
+  // });
+  return [pane];
 };

@@ -2,7 +2,7 @@ import { load } from "@tensorflow-models/deeplab";
 import { getA_nStack, getComplexPoints, getLejaPoints } from "./fractalize.js";
 import { PARAMS } from "./config";
 import * as tf from "@tensorflow/tfjs-core";
-import { stack } from "@tensorflow/tfjs-core";
+// import {} from "@tensorflow/tfjs-core";
 // basically just
 // - handle an image upload
 // - resize it to fit with our params

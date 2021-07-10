@@ -10,6 +10,8 @@ export const handleUrl = () => {
   const nC = urlParams.get("nc");
   const nL = urlParams.get("nl");
   const mI = urlParams.get("mi");
+  const sI = urlParams.get("si");
+
   if (nC != null) {
     PARAMS.numColors = parseInt(nC);
   }
@@ -19,10 +21,14 @@ export const handleUrl = () => {
   if (mI != null) {
     PARAMS.maxIterations = parseInt(mI);
   }
+  if (sI == "false") {
+    console.log(sI);
+    const sourceCanvas = document.getElementById("source");
+    sourceCanvas.classList.add("hidden");
+  }
 
   if (imgParamUrl == null) {
-    imgParamUrl =
-      "https://source.unsplash.com/random?eagle,lion,frog,mosque,cathedral";
+    imgParamUrl = "https://source.unsplash.com/random?cats";
   }
 
   return imgParamUrl;

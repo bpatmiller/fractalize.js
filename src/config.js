@@ -64,7 +64,7 @@ export const makePane = () => {
       animate();
     });
   pane
-    .addInput(PARAMS, "scale", { min: 0.1, max: 10.0, step: 0.1 })
+    .addInput(PARAMS, "scale", { min: 0.1, max: 250.0, step: 0.1 })
     .on("change", (ev) => {
       updateControlUniforms();
       animate();

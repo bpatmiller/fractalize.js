@@ -148,8 +148,9 @@ document.addEventListener(
       if (e.ctrlKey) {
         ticking = true;
         requestAnimationFrame(() => {
-          let newScale = PARAMS.scale - e.deltaY * 0.025;
-          PARAMS.scale = Math.max(0.1, Math.min(100.0, newScale));
+          let zoomFac = 1.0 - e.deltaY * 0.1;
+          let newScale = zoomFac * PARAMS.scale;
+          PARAMS.scale = Math.max(0.1, Math.min(250.0, newScale));
           updateControlUniforms();
           if (!PARAMS.playing) animate();
           ticking = false;

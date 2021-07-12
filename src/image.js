@@ -54,18 +54,17 @@ const resizeURLImagetoCanvas = (dataURL, canvasId) =>
         imgData: ctx.getImageData(0, 0, w, h),
       });
     };
+    img.onerror = (ev) => {
+      console.log(ev);
+    };
     img.src = dataURL;
   });
 
-export const loadImage = (imgUrl) => {
-  const oldCanvasContainer = document.getElementById("source");
-  oldCanvasContainer?.remove();
-
-  const sourceCanvas = document.createElement("canvas");
-  sourceCanvas.setAttribute("id", "source");
-  const fractalContainer = document.getElementById("fractal-container");
-  fractalContainer.appendChild(sourceCanvas);
-  return resizeURLImagetoCanvas(imgUrl, srcImgCanvasName);
+export const loadImage = async (imgUrl) => {
+  const canvas = document.getElementById("source");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  return await resizeURLImagetoCanvas(imgUrl, "source");
 };
 
 export const loadModel = async (modelName) => {

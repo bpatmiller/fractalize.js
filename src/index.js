@@ -97,7 +97,7 @@ export const init = async (imgUrl) => {
   });
 
   configuration.imgData = imgData;
-  await segment(imgData);
+  segment(imgData);
 };
 
 // spacebar to fetch new random image

@@ -1,6 +1,7 @@
 import { Pane } from "../_snowpack/pkg/tweakpane.js";
 import { animate, updateControlUniforms } from "./gl.js";
-import { segment, computeFractal } from "./index.js";
+import { segment, computeFractal, init, loading } from "./index.js";
+import { randomImageUrl } from "./url.js";
 
 export const PARAMS = {
   playing: true,
@@ -11,13 +12,14 @@ export const PARAMS = {
   focus: { x: 0.0, y: 0.0 },
   numLejaPoints: 32,
   maxIterations: 8,
+  // distortion
 };
 
 export const makePane = () => {
   const pane = new Pane({
     container: document.getElementById("settingsPanel"),
     title: "Parameters",
-    expanded: false,
+    expanded: true,
   });
 
   PARAMS.outputSize = 513;
@@ -37,26 +39,7 @@ export const makePane = () => {
     animate();
   });
   pane
-    .addInput(PARAMS, "numLejaPoints", { min: 4, max: 64, step: 1 })
-    .on("change", () => {
-      computeFractal();
-    });
-  pane.addSeparator();
-
-  pane
     .addInput(PARAMS, "maxIterations", { min: 4, max: 64, step: 1 })
-    .on("change", (ev) => {
-      updateControlUniforms();
-      animate();
-    });
-  pane
-    .addInput(PARAMS, "scale", { min: 0.5, max: 1000.0, step: 0.1 })
-    .on("change", (ev) => {
-      updateControlUniforms();
-      animate();
-    });
-  pane
-    .addInput(PARAMS, "focus", { picker: "inline", expanded: false })
     .on("change", (ev) => {
       updateControlUniforms();
       animate();
@@ -64,6 +47,18 @@ export const makePane = () => {
   pane.addSeparator();
 
   pane.addMonitor(PARAMS, "numValidSubsets");
+
+  pane.addSeparator();
+
+  pane
+    .addButton({
+      title: "load random image",
+    })
+    .on("click", () => {
+      if (!loading) {
+        init(randomImageUrl);
+      }
+    });
 
   return [pane];
 };

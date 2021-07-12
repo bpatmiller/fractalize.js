@@ -5,7 +5,7 @@ import { vertexShader, fragmentShader } from "./shaders.js";
 // panels is a jank global object of shaders on panels
 let renderer, camera;
 let panels = {};
-let scene;
+let scene = new THREE.Scene();
 let time = 0;
 let timeDelta = -0.02;
 let dragging = false;
@@ -28,9 +28,9 @@ export const updateControlUniforms = () => {
 const updateUniforms = (panelIndex, an, nl, lejaPoints) => {
   let material = panels[panelIndex].material;
 
-  time = 0;
-  timeDelta = 0;
-  material.uniforms.time.value = 0;
+  time = 12.0;
+  timeDelta = -0.02;
+  material.uniforms.time.value = 12.0;
 
   material.uniforms.an.value = an;
   material.uniforms.nl.value = nl;
@@ -121,29 +121,42 @@ const updateStackUniforms = (lejaStack, A_nStack) => {
 };
 
 const getRenderDimensions = () => {
-  const sourceCanvas = document.getElementById("source");
-  let sourceW = 0;
-  if (sourceCanvas.classList.contains("hidden")) {
-    sourceW = sourceCanvas.clientWidth;
-  }
+  let { width, height } = document.getElementById("source");
+  const innerWidth = window.innerWidth;
+  const innerHeight = window.innerHeight;
 
-  const sourceContainer = document.getElementById("source");
-  let renderWidth = Math.floor(sourceContainer.width);
-  let renderHeight = Math.floor(sourceContainer.height);
-  let xR = renderWidth / (window.innerWidth * 0.85 - sourceW);
-  let yR = renderHeight / (window.innerHeight * 0.85);
-  let expandRatio = Math.max(xR, yR);
-  renderWidth /= expandRatio;
-  renderHeight /= expandRatio;
-  return [renderWidth, renderHeight];
+  const maxHeightPercent = 0.85;
+
+  // try horiz
+  let hw = innerWidth - width - 128;
+  let hh = innerHeight * maxHeightPercent - 64;
+  let horizTileScaleFactor = Math.min(hw / width, hh / height);
+  let horizTileArea = hw * hh * horizTileScaleFactor;
+  // vertical
+  let vw = innerWidth - 64;
+  let vh = innerHeight * maxHeightPercent - height - 128;
+  let vertiTileScaleFactor = Math.min(vw / width, vh / height);
+  let vertiTileArea = vw * vh * vertiTileScaleFactor;
+
+  if (horizTileArea > vertiTileArea) {
+    width *= horizTileScaleFactor;
+    height *= horizTileScaleFactor;
+  } else {
+    width *= vertiTileScaleFactor;
+    height *= vertiTileScaleFactor;
+  }
+  width = Math.floor(width);
+  height = Math.floor(height);
+
+  return [width, height];
 };
 
 export const resizeRenderer = () => {
   if (renderer == null) {
     return;
   }
-  const [renderWidth, renderHeight] = getRenderDimensions();
-  renderer.setSize(renderWidth, renderHeight);
+  const [width, height] = getRenderDimensions();
+  renderer.setSize(width, height);
 };
 
 export const toggleSourceDisplay = () => {
@@ -160,6 +173,7 @@ const setupRenderer = () => {
 
   const rendererContainer = document.getElementById("fractal-container");
   renderer.domElement.setAttribute("id", "fractal");
+  renderer.domElement.classList.add("flex-box");
   resizeRenderer();
   rendererContainer.appendChild(renderer.domElement);
   window.onresize = resizeRenderer;
@@ -212,6 +226,11 @@ const setupControls = () => {
   });
 };
 
+export const clearScene = () => {
+  panels = {};
+  scene.clear();
+};
+
 export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
   if (panels.length > 0) {
     updateStackUniforms(lejaStack, A_nStack);
@@ -232,8 +251,9 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
     }
   }
 
-  scene = new THREE.Scene();
+  clearScene();
 
+  const geometry = new THREE.PlaneBufferGeometry(2, 2);
   for (let key in lejaStack) {
     let lejaPoints = lejaStack[key];
     let A_n = A_nStack[key];
@@ -241,13 +261,12 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
     let setSize = setSizes[key];
     let color = colors[key];
 
-    const geometry = new THREE.PlaneBufferGeometry(2, 2);
     geometry.translate(0, 0, -0.1 * (setSize / maxSetSize));
     const material = new THREE.ShaderMaterial({
       uniforms: {
         an: { value: A_n },
         nl: { value: lejaPoints.length },
-        time: { value: 0.0 },
+        time: { value: time },
         maxIterations: { value: 8 },
         scale: { value: 1.0 },
         color: { value: new THREE.Vector3(color[0], color[1], color[2]) },
@@ -336,11 +355,12 @@ export const setupGL = (lejaStack, A_nStack, centers, colors, setSizes) => {
 export const animate = () => {
   if (renderer == null) return;
   if (PARAMS.playing && time >= 0) {
-    requestAnimationFrame(animate);
+    time += timeDelta;
+    time = Math.max(0.0, time);
     for (let key in panels) {
-      time += timeDelta;
-      panels[key].material.uniforms.time.value += timeDelta;
+      panels[key].material.uniforms.time.value = time;
     }
+    requestAnimationFrame(animate);
   }
   renderer.render(scene, camera);
 };

@@ -46,6 +46,7 @@ const resizeURLImagetoCanvas = (dataURL, canvasId) =>
       let h = Math.floor(img.height * (PARAMS.outputSize / mainAxis));
       canvas.width = w;
       canvas.height = h;
+
       ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, w, h);
       resolve({
         width: w,
@@ -53,11 +54,17 @@ const resizeURLImagetoCanvas = (dataURL, canvasId) =>
         imgData: ctx.getImageData(0, 0, w, h),
       });
     };
+    img.onerror = (ev) => {
+      console.log(ev);
+    };
     img.src = dataURL;
   });
 
-export const loadImage = (imgUrl) => {
-  return resizeURLImagetoCanvas(imgUrl, srcImgCanvasName);
+export const loadImage = async (imgUrl) => {
+  const canvas = document.getElementById("source");
+  const ctx = canvas.getContext("2d");
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  return await resizeURLImagetoCanvas(imgUrl, "source");
 };
 
 export const loadModel = async (modelName) => {
@@ -69,23 +76,17 @@ export const segmentImage = async (model, imgData) => {
   return { legend, segmentationMap };
 };
 
-export const connectedSubsets = async (imgData, segmentationMap) => {
+export const connectedSubsets = (imgData, segmentationMap) => {
   const width = imgData.width;
   const height = imgData.height;
-
-  // key: which subset
-  // value: list of pixels
-  // sets will be used for quickly finding each complex point
   let sets = {};
-  // sizes for all clusters
   let setSizes = {};
-  // image texture where pixel val
-  // => group membership
-  let groups = tf.zeros([height, width]).bufferSync();
-
-  const seg = tf.browser
-    .fromPixels(new ImageData(segmentationMap, width, height))
-    .bufferSync();
+  const groupT = tf.zeros([height, width]);
+  let groups = groupT.bufferSync();
+  const segT = tf.browser.fromPixels(
+    new ImageData(segmentationMap, width, height)
+  );
+  const seg = segT.bufferSync();
 
   const check = (g, x, y, w, z) => {
     const inBounds = w < width && w >= 0 && z < height && z >= 0;
@@ -97,11 +98,9 @@ export const connectedSubsets = async (imgData, segmentationMap) => {
     [0, 1, 2].forEach((channel) => {
       sameColor = sameColor && seg.get(z, w, channel) == seg.get(y, x, channel);
     });
-
     if (notChecked && sameColor) {
       return true;
     }
-
     return false;
   };
 
@@ -131,14 +130,12 @@ export const connectedSubsets = async (imgData, segmentationMap) => {
   };
 
   let numGroups = 1;
-  // let validGroups = 0;
   const minSize = 500;
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       if (groups.get(y, x) == 0) {
         let count = expandCluster([y, x], numGroups);
         if (count > minSize) {
-          // validGroups++;
           sets[numGroups] = [];
           setSizes[numGroups] = count;
         }
@@ -171,13 +168,21 @@ export const connectedSubsets = async (imgData, segmentationMap) => {
   // overlay onto orig canvas
   const srcCanvas = document.getElementById(srcImgCanvasName);
   const ctx = srcCanvas.getContext("2d");
-  ctx.putImageData(imgData, 0, 0);
+  ctx.fillStyle = "rgba(30,30,30,0.5)";
+  ctx.fillRect(0, 0, width, height);
   for (let x = 0; x < width; x++) {
     for (let y = 0; y < height; y++) {
       let group = groups.get(y, x);
       if (group in sets) {
-        let [r, g, b] = hslToRgb(0.5 * (1 + Math.sin(group * 130.1)), 0.8, 0.9);
-        ctx.fillStyle = `rgba(${r},${g},${b},0.7)`;
+        let hue = 0;
+        let groupPercent = group / numGroups;
+        if (groupPercent < 0.5) {
+          hue = groupPercent + 0.5;
+        } else {
+          hue = groupPercent - 0.5;
+        }
+        let [r, g, b] = hslToRgb(hue, 0.6, 0.45);
+        ctx.fillStyle = `rgba(${r},${g},${b},0.15)`;
         ctx.fillRect(x, y, 1, 1);
       }
     }
@@ -190,10 +195,12 @@ export const connectedSubsets = async (imgData, segmentationMap) => {
     const set = sets[key];
     for (let i = 0; i < set.length; i++) {
       let [x, y] = set[i];
-      ctx.fillStyle = `rgba(255,100,100,0.5)`;
+      ctx.fillStyle = `rgba(240,240,240,.7)`;
       ctx.fillRect(x, y, 1, 1);
     }
   }
 
+  groupT.dispose();
+  segT.dispose();
   return [sets, setSizes];
 };

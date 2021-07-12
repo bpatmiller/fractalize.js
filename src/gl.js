@@ -128,13 +128,13 @@ const getRenderDimensions = () => {
   const maxHeightPercent = 0.85;
 
   // try horiz
-  let hw = innerWidth - width - 128;
-  let hh = innerHeight * maxHeightPercent - 64;
+  let hw = Math.max(0, innerWidth - width - 128);
+  let hh = Math.max(0, innerHeight * maxHeightPercent - 64);
   let horizTileScaleFactor = Math.min(hw / width, hh / height);
   let horizTileArea = hw * hh * horizTileScaleFactor;
   // vertical
-  let vw = innerWidth - 64;
-  let vh = innerHeight * maxHeightPercent - height - 128;
+  let vw = Math.max(0, innerWidth - 64);
+  let vh = Math.max(0, innerHeight * maxHeightPercent - height - 128);
   let vertiTileScaleFactor = Math.min(vw / width, vh / height);
   let vertiTileArea = vw * vh * vertiTileScaleFactor;
 
@@ -147,7 +147,6 @@ const getRenderDimensions = () => {
   }
   width = Math.floor(width);
   height = Math.floor(height);
-
   return [width, height];
 };
 

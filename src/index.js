@@ -16,14 +16,17 @@ import {
   updateControlUniforms,
 } from "./gl.js";
 import extractColors from "extract-colors";
+import { LoadingPane } from "./loadingPane";
 
+export let loading = true;
 let ticking = false;
 const imgParamUrl = handleUrl();
-const [pane] = makePane();
+makePane();
+const loadingPane = new LoadingPane();
 
 tf.setBackend("webgl");
 
-const configuration = {
+let configuration = {
   models: {
     pascal: null,
     ade20k: null,
@@ -48,53 +51,53 @@ const getColorScheme = (sets) => {
   return colors;
 };
 
-export const computeFractal = () => {
-  const lejaStack = getLejaPoints(configuration.complexPoints);
+export const computeFractal = (complexPoints, centers, setSizes, colors) => {
+  loadingPane.sendMessage("generating leja points");
+  const lejaStack = getLejaPoints(complexPoints);
   const A_nStack = getA_nStack(lejaStack);
-  setupGL(
-    lejaStack,
-    A_nStack,
-    configuration.centers,
-    configuration.colors,
-    configuration.setSizes
-  );
+  loadingPane.sendMessage("setting up renderer");
+  setupGL(lejaStack, A_nStack, centers, colors, setSizes);
+  loadingPane.clear();
+  loading = false;
 };
 
-export const segment = async () => {
-  const imgData = configuration.imgData;
-
+export const segment = async (imgDataInput = null) => {
+  loadingPane.sendMessage("segmenting image");
+  const imgData = imgDataInput == null ? configuration.imgData : imgDataInput;
   const model = configuration.models[PARAMS.model];
-  const { legend, segmentationMap } = await segmentImage(model, imgData);
+  const { segmentationMap } = await segmentImage(model, imgData);
+  loadingPane.sendMessage("finding closed jordan curves");
   const [sets, setSizes] = await connectedSubsets(imgData, segmentationMap);
-  configuration.setSizes = setSizes;
-  configuration.colors = getColorScheme(sets);
+  const colors = getColorScheme(sets);
   const [complexPoints, centers] = getComplexPoints(
     sets,
     imgData.width,
     imgData.height
   );
 
-  configuration.complexPoints = complexPoints;
-  configuration.centers = centers;
-  computeFractal();
+  computeFractal(complexPoints, centers, setSizes, colors);
 };
 
-const init = async (imgUrl) => {
+export const init = async (imgUrl) => {
+  loading = true;
+  loadingPane.sendMessage("loading image");
+  const { imgData } = await loadImage(imgUrl);
+  loadingPane.sendMessage("loading tensorflow models");
   for (let key in configuration.models) {
     if (configuration.models[key] == null) {
       configuration.models[key] = await loadModel(key);
     }
   }
 
-  let { imgData } = await loadImage(imgUrl);
+  loadingPane.sendMessage("extracting colorscheme");
   configuration.colorscheme = await extractColors.extractColors(imgData, {
     distance: 0.2,
     splitPower: 14,
     saturationImportance: 0.23,
   });
-  // console.log(configuration.colorscheme);
+
   configuration.imgData = imgData;
-  segment();
+  await segment(imgData);
 };
 
 // spacebar to fetch new random image

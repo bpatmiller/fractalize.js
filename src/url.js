@@ -1,4 +1,7 @@
 import { PARAMS } from "./config";
+import catImage from "../assets/cat.jpeg";
+
+export const randomImageUrl = "https://source.unsplash.com/random";
 
 export const handleUrl = () => {
   // return either the url image or a random unsplash image url
@@ -6,7 +9,7 @@ export const handleUrl = () => {
   const urlParams = new URLSearchParams(queryString);
   let imgParamUrl = urlParams.get("img");
 
-  // num Colors (deprecated), num lejas, max iterations
+  // num lejas, max iterations, show source image
   const nL = urlParams.get("nl");
   const mI = urlParams.get("mi");
   const sI = urlParams.get("si");
@@ -23,8 +26,7 @@ export const handleUrl = () => {
   }
 
   if (imgParamUrl == null) {
-    imgParamUrl = "https://source.unsplash.com/random?cats";
+    imgParamUrl = catImage;
   }
-
   return imgParamUrl;
 };

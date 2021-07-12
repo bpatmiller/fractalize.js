@@ -38,12 +38,6 @@ export const makePane = () => {
   pane.addInput(PARAMS, "playing").on("change", (ev) => {
     animate();
   });
-  // pane
-  //   .addInput(PARAMS, "numLejaPoints", { min: 4, max: 64, step: 1 })
-  //   .on("change", () => {
-  //     computeFractal();
-  //   });
-
   pane
     .addInput(PARAMS, "maxIterations", { min: 4, max: 64, step: 1 })
     .on("change", (ev) => {

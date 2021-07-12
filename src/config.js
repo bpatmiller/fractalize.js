@@ -6,20 +6,19 @@ import { randomImageUrl } from "./url.js";
 export const PARAMS = {
   playing: true,
   model: "",
-  outputSize: 260,
+  outputSize: 513,
   numValidSubsets: "",
   scale: 1.0,
   focus: { x: 0.0, y: 0.0 },
   numLejaPoints: 32,
   maxIterations: 8,
-  // distortion
 };
 
 export const makePane = () => {
   const pane = new Pane({
     container: document.getElementById("settingsPanel"),
     title: "Parameters",
-    expanded: true,
+    expanded: false,
   });
 
   PARAMS.outputSize = 513;

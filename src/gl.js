@@ -217,8 +217,8 @@ const setupControls = () => {
       let deltaY = mouseY - lastMouseY;
       lastMouseX = mouseX;
       lastMouseY = mouseY;
-      PARAMS.focus.x += (0.01 * deltaX) / PARAMS.scale;
-      PARAMS.focus.y += (0.01 * deltaY) / PARAMS.scale;
+      PARAMS.focus.x += (0.005 * deltaX) / PARAMS.scale;
+      PARAMS.focus.y += (0.005 * deltaY) / PARAMS.scale;
       updateControlUniforms();
       if (!PARAMS.playing) animate();
     }

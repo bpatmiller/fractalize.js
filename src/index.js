@@ -146,7 +146,7 @@ document.addEventListener(
     if (!ticking) {
       ticking = true;
       requestAnimationFrame(() => {
-        let zoomFac = 1.0 + e.deltaY * 0.1;
+        let zoomFac = 1.0 + e.deltaY * 0.0005;
         let newScale = zoomFac * PARAMS.scale;
         PARAMS.scale = Math.max(0.5, Math.min(1000.0, newScale));
         updateControlUniforms();
